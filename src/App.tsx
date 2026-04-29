@@ -44,49 +44,49 @@ const NAV = [
 const HIGHLIGHTS = [
   {
     id: "01", severity: "orange" as const,
-    title: "Tool Adoption Gap",
+    title: "Deployed tools are not generating their expected return due to insufficient adoption and change management",
     content: "The Group operates with tools that have been deployed without adequate training, change management support, or documented processes. High staff turnover — particularly among care teams and residence managers — leads to systematic knowledge loss: tools are used inconsistently across residences, Excel workarounds are pervasive, and data entry remains non-systematic (resident attendance logs, care schedules, shift planning). Usage quality is not monitored, and deviations from input standards are never escalated.",
     impact: "Deployed tools fail to generate the expected ROI. Residence-level operational reporting is unreliable and requires extensive manual rework before any group-level consolidation can be attempted.",
   },
   {
     id: "02", severity: "orange" as const,
-    title: "Fragmented Application Portfolio",
+    title: "Redundant tools across every functional domain are creating data silos and uncontrolled cost overruns",
     content: "The Group operates with redundant tools at every layer of its IT stack — 2 to 3 competing solutions per functional domain. Business departments procure solutions independently without DSI validation, creating a pervasive shadow IT landscape with unmanaged duplicates. On CRM: Salesforce and Microsoft Dynamics co-exist without clear ownership. On HRIS: Lucas was deployed but placed on hold. On finance: Turbo and Kyriba are both still active for resident billing despite an ongoing migration.",
     impact: "Estimated cost overrun of several hundred thousand euros per year due to duplicate licenses and maintenance. Data silos prevent consolidated group-level reporting and make any BI or AI initiative impossible without prior rationalization.",
   },
   {
     id: "03", severity: "red" as const,
-    title: "Stalled Transformation Projects",
+    title: "Several structuring IT initiatives have been initiated but have yet to deliver value",
     content: "The Group has initiated several structuring IT initiatives that have not delivered their intended value. The HRIS Lucas was deployed, then placed on hold due to lack of change management. The Group abandoned a structuring ERP whose capabilities matched its operational needs. A 100K€ investment was made with an external provider for a DataHub — no deliverable has been received to date. A further 100K€+ was committed to Power BI / MS Fabric dashboards, now on standby.",
     impact: "Over 400K€ in IT investments with no measurable return. Legacy tools (Turbo, manual reconciliation workflows) remain in place due to the absence of a stable operational target architecture.",
   },
   {
     id: "04", severity: "red" as const,
-    title: "No Master Data Reference",
+    title: "The absence of a shared master data reference makes consolidated reporting and any BI initiative complex",
     content: "No shared master data system exists between Sage, Agesoft, Lucas, and the ARS / Departmental authority portals. Each system has independently generated its own identifiers with no cross-reference table. The list of residences was requested from 4 separate departments; 4 different lists were received, ranging from 75 to 120 establishments depending on the source. Monthly group reporting is produced entirely by hand by a single Controller using Excel.",
     impact: "It is impossible to determine occupancy rates or per-residence profitability in real time. No BI or AI initiative can be considered without a validated, shared group-level data reference.",
   },
   {
     id: "05", severity: "red" as const,
-    title: "Data Infrastructure to Build",
+    title: "The Group's data pipeline rests on a fragile, undocumented architecture with a single point of failure",
     content: "All group data flows (Salesforce, Sage, Agesoft, Lucas, Kyriba) pass through an in-house ESB developed and maintained by a single developer — undocumented, with no high-availability setup or real-time monitoring. A second DataHub project was contracted out to an external provider for 100K€, with no deliverable communicated to date. Power BI / MS Fabric dashboards remain on standby due to the absence of documented and validated data sources.",
     impact: "Over 200K€ already invested in BI with no operational benefit. BI and AI roadmap items cannot be launched until the data foundation is secured, documented, and handed over.",
   },
   {
     id: "06", severity: "red" as const,
-    title: "Unresolved Cyber Vulnerabilities",
+    title: "Material cybersecurity vulnerabilities remain unaddressed, with direct exposure on operational continuity and GDPR compliance",
     content: "In January 2025, the Group suffered a crypto-mining incident exploiting an administrator account with no MFA enabled. The France LAN network relies on end-of-life switches with Telnet still active and no administration VLAN in place. Suspicious outbound connections from Agesoft have been identified, raising a material GDPR risk on resident health data. Thousands of frontline employees — care workers, nurses, auxiliary staff — do not have a professional email address, making secure identity management structurally impossible.",
     impact: "Material risk of a major cyber incident. No formalized Business Continuity Plan (BCP) exists for critical systems (Agesoft, Sage, Kyriba). Regulatory exposure on GDPR for resident health data.",
   },
   {
     id: "07", severity: "orange" as const,
-    title: "Manual and Time-Consuming Processes",
+    title: "A significant share of finance and operations capacity is absorbed by manual processes that are technically automatable",
     content: "Bank reconciliation requires 4 to 5 FTE in France due to the absence of integration between Kyriba and Sage. Turbo and Kyriba still co-exist for resident billing with no confirmed migration end date. ARS declarations are 100% manual: as of March 31, 2026, only 20% of residences had submitted on time. No purchase order tool exists — residence managers commit spend without any budget validation. Monthly financial close takes several weeks beyond market standards.",
     impact: "Between 5 and 10 FTE estimated as recoverable in the short term, equivalent to 300–600K€ in redeployable capacity. Structural impact on ARS funding allocations: 80% of declarations submitted after the regulatory deadline.",
   },
   {
     id: "08", severity: "orange" as const,
-    title: "DSI Governance to Structure",
+    title: "The absence of a formal IT governance framework prevents effective prioritization and investment tracking",
     content: "No formal IT demand management, project prioritization, or steering process exists between the DSI and business units. High business-team turnover prevents stable requirement definition. The DSI is perceived solely as a logistics cost center rather than a strategic partner. No Group IT Steering Committee (COPIL SI) is in place. IT architecture decisions are made reactively, without forward planning or ROI tracking.",
     impact: "Risk of continued investment in non-ROI projects. No mechanism exists to arbitrate and sequence cross-functional workstreams (Sage finalization, Kyriba integration, HRIS Lucas, Agesoft API).",
   },
@@ -128,56 +128,56 @@ interface ToolCategory { category: string; tools: Tool[]; }
 
 const TOOLS_FRANCE: ToolCategory[] = [
   { category: "Finance & ERP", tools: [
-    { name: "Sage",        status: "ok",      desc: "SaaS ERP — accounting, billing, financial master data", opex: "~95K€" },
-    { name: "Kyriba",      status: "ok",      desc: "Treasury management and supplier payments", opex: "~42K€" },
-    { name: "Cegid Conso", status: "ok",      desc: "Group accounting consolidation", opex: "~18K€" },
-    { name: "Cegid Paie",  status: "ok",      desc: "Outsourced payroll — France", opex: "outsourced" },
-    { name: "Yooz",        status: "partial", desc: "Supplier invoice dematerialization — covers 70% of invoices; 30% still manually entered", opex: "~22K€" },
-    { name: "Turbo",       status: "ko",      desc: "Resident billing legacy tool — Kyriba migration ongoing with no confirmed end date", opex: "~12K€" },
-    { name: "EBP Compta",  status: "ko",      desc: "Legacy ERP — retained for archive access only; decommission planned", opex: "~8K€" },
-    { name: "Etafi",       status: "ok",      desc: "Consolidated tax filings", opex: "~9K€" },
-    { name: "CIEL",        status: "ko",      desc: "100% manual billing on residual scope — decommission required", opex: "~5K€" },
-    { name: "Jenji",       status: "partial", desc: "Employee expense reports", opex: "~6K€" },
+    { name: "Sage",        status: "ok",      desc: "SaaS ERP — accounting, billing, financial master data", opex: "95K€" },
+    { name: "Kyriba",      status: "ok",      desc: "Treasury management and supplier payments", opex: "42K€" },
+    { name: "Cegid Conso", status: "ok",      desc: "Group accounting consolidation", opex: "18K€" },
+    { name: "Cegid Paie",  status: "ok",      desc: "Outsourced payroll — France", opex: "85K€" },
+    { name: "Yooz",        status: "partial", desc: "Supplier invoice dematerialization — covers 70% of invoices; 30% still manually entered", opex: "22K€" },
+    { name: "Turbo",       status: "ko",      desc: "Resident billing legacy tool — Kyriba migration ongoing with no confirmed end date", opex: "12K€" },
+    { name: "EBP Compta",  status: "ko",      desc: "Legacy ERP — retained for archive access only; decommission planned", opex: "8K€" },
+    { name: "Etafi",       status: "ok",      desc: "Consolidated tax filings", opex: "9K€" },
+    { name: "Sage 50",        status: "ko",      desc: "100% manual billing on residual scope — decommission required", opex: "5K€" },
+    { name: "Jenji",       status: "partial", desc: "Employee expense reports", opex: "6K€" },
   ]},
   { category: "Care Operations", tools: [
-    { name: "Agesoft", status: "partial", desc: "Core EHPAD ERP — admissions, resident attendance, Section Soins & Dépendance billing, ARS/Departmental portal connections. Heavy client. API available.", opex: "~48K€" },
+    { name: "Agesoft", status: "partial", desc: "Core EHPAD ERP — admissions, resident attendance, Section Soins & Dépendance billing, ARS/Departmental portal connections. Heavy client. API available.", opex: "48K€" },
   ]},
   { category: "CRM & Commercial", tools: [
-    { name: "Salesforce",              status: "partial", desc: "BtoB/BtoC CRM — leads, pipeline, institutional partner contracts. 86 active licenses. Outlook sync broken, emails disabled.", opex: "~92K€" },
-    { name: "Microsoft Dynamics",      status: "ko",      desc: "Shadow CRM — adopted by certain teams without DSI validation, creating data silos alongside Salesforce", opex: "~35K€" },
-    { name: "LinkedIn Sales Navigator",status: "ok",      desc: "BtoB commercial prospecting", opex: "~72K€" },
-    { name: "Plezi",                   status: "partial", desc: "B2B marketing automation — fully configured but never launched", opex: "~8,400€" },
-    { name: "Partoo",                  status: "ok",      desc: "Google listings and online directory management across all residences", opex: "~58K€" },
-    { name: "Mailjet",                 status: "ok",      desc: "Marketing and transactional email sending platform", opex: "~840€" },
-    { name: "Airtable",               status: "partial", desc: "Marketing support requests tracking — 1 active license only", opex: "~1,320€" },
-    { name: "N8N",                     status: "partial", desc: "Lead automation and scoring — 25 critical undocumented workflows", opex: "~1,140€" },
-    { name: "Softr.io",               status: "ok",      desc: "Group website management", opex: "~3,600€" },
-    { name: "Meta / Google Ads",       status: "ok",      desc: "Digital acquisition campaigns (SEA, social media)", opex: "~160K€" },
+    { name: "Salesforce",              status: "partial", desc: "BtoB/BtoC CRM — leads, pipeline, institutional partner contracts. 86 active licenses. Outlook sync broken, emails disabled.", opex: "92K€" },
+    { name: "Microsoft Dynamics",      status: "ko",      desc: "Shadow CRM — adopted by certain teams without DSI validation, creating data silos alongside Salesforce", opex: "35K€" },
+    { name: "LinkedIn Sales Navigator",status: "ok",      desc: "BtoB commercial prospecting", opex: "72K€" },
+    { name: "Plezi",                   status: "partial", desc: "B2B marketing automation — fully configured but never launched", opex: "8K€" },
+    { name: "Partoo",                  status: "ok",      desc: "Google listings and online directory management across all residences", opex: "58K€" },
+    { name: "Mailjet",                 status: "ok",      desc: "Marketing and transactional email sending platform", opex: "1K€" },
+    { name: "Airtable",               status: "partial", desc: "Marketing support requests tracking — 1 active license only", opex: "1K€" },
+    { name: "N8N",                     status: "partial", desc: "Lead automation and scoring — 25 critical undocumented workflows", opex: "1K€" },
+    { name: "Softr.io",               status: "ok",      desc: "Group website management", opex: "4K€" },
+    { name: "Meta / Google Ads",       status: "ok",      desc: "Digital acquisition campaigns (SEA, social media)", opex: "160K€" },
   ]},
   { category: "HR & HRIS", tools: [
-    { name: "Lucas",    status: "partial", desc: "Group SaaS HRIS — employee records, recruitment, training, absences. Deployed then placed on hold. No change management plan.", opex: "~224K€" },
-    { name: "RiseUp",   status: "ok",      desc: "LMS and online training platform", opex: "~71K€" },
-    { name: "PILA",     status: "ok",      desc: "Employee onboarding and offboarding workflows", opex: "included" },
-    { name: "DocuSign", status: "partial", desc: "Electronic signatures — 114 active licenses incl. 7 admin accounts on departed employees", opex: "~18K€" },
+    { name: "Lucas",    status: "partial", desc: "Group SaaS HRIS — employee records, recruitment, training, absences. Deployed then placed on hold. No change management plan.", opex: "224K€" },
+    { name: "360Learning",   status: "ok",      desc: "LMS and online training platform", opex: "71K€" },
+    { name: "PILA",     status: "ok",      desc: "Employee onboarding and offboarding workflows", opex: "14K€" },
+    { name: "DocuSign", status: "partial", desc: "Electronic signatures — 114 active licenses incl. 7 admin accounts on departed employees", opex: "18K€" },
   ]},
   { category: "Quality", tools: [
-    { name: "BlueKanGo", status: "partial", desc: "Quality management — EHPAD audits, adverse event reporting, ARS compliance tracking. Also misused as IT helpdesk.", opex: "~31K€" },
+    { name: "Qualineo", status: "partial", desc: "Quality management — EHPAD audits, adverse event reporting, ARS compliance tracking. Also misused as IT helpdesk.", opex: "31K€" },
   ]},
   { category: "Data & BI", tools: [
-    { name: "Power BI / MS Fabric",  status: "ko",      desc: "Reporting and dashboards — on standby; no documented data sources validated by business teams", opex: "~10,800€" },
-    { name: "DataHub (in-house ESB)",status: "partial", desc: "Internal service bus — fragile architecture, single developer, no documentation, no monitoring", opex: "~12K€" },
-    { name: "GED with OCR",          status: "partial", desc: "Document management with optical recognition — new 2026 project, not yet live", opex: "~27K€" },
+    { name: "Power BI / MS Fabric",  status: "ko",      desc: "Reporting and dashboards — on standby; no documented data sources validated by business teams", opex: "11K€" },
+    { name: "DataHub (in-house ESB)",status: "partial", desc: "Internal service bus — fragile architecture, single developer, no documentation, no monitoring", opex: "12K€" },
+    { name: "GED with OCR",          status: "partial", desc: "Document management with optical recognition — new 2026 project, not yet live", opex: "27K€" },
   ]},
   { category: "Infrastructure & Security", tools: [
-    { name: "Partitio",      status: "ok",      desc: "OVH private cloud — HDS certified hosting", opex: "included" },
-    { name: "Safeo",         status: "ok",      desc: "Health data certified hosting (données de santé)", opex: "included" },
-    { name: "Microsoft 365", status: "partial", desc: "Productivity suite, email, collaboration — deployment in progress across residences", opex: "included" },
-    { name: "Intune",        status: "partial", desc: "MDM and device fleet management — deployment in progress", opex: "included" },
-    { name: "Entra ID",      status: "ok",      desc: "Identity and access management — group directory", opex: "included" },
-    { name: "MailInBlack",   status: "ok",      desc: "Email security and anti-spam filtering", opex: "included" },
-    { name: "Sophos XDR",    status: "ok",      desc: "Endpoint detection and threat response", opex: "included" },
-    { name: "SFR Business",  status: "ok",      desc: "Mobile and fixed network connectivity", opex: "included" },
-    { name: "Jira",          status: "ok",      desc: "DSI project and ticket management", opex: "included" },
+    { name: "Scaleway",      status: "ok",      desc: "OVH private cloud — HDS certified hosting", opex: "28K€" },
+    { name: "OVH Health Cloud",         status: "ok",      desc: "Health data certified hosting (données de santé)", opex: "18K€" },
+    { name: "Microsoft 365", status: "partial", desc: "Productivity suite, email, collaboration — deployment in progress across residences", opex: "95K€" },
+    { name: "Intune",        status: "partial", desc: "MDM and device fleet management — deployment in progress", opex: "22K€" },
+    { name: "Entra ID",      status: "ok",      desc: "Identity and access management — group directory", opex: "8K€" },
+    { name: "Vade Secure",   status: "ok",      desc: "Email security and anti-spam filtering", opex: "12K€" },
+    { name: "CrowdStrike Falcon",    status: "ok",      desc: "Endpoint detection and threat response", opex: "35K€" },
+    { name: "SFR Business",  status: "ok",      desc: "Mobile and fixed network connectivity", opex: "180K€" },
+    { name: "Jira",          status: "ok",      desc: "DSI project and ticket management", opex: "9K€" },
   ]},
 ];
 
@@ -265,7 +265,7 @@ const MISSING_TOOLS = [
   { name: "Document Management System (DMS with OCR)", severity: "orange" as const,
     desc: "No structured tool to process incoming document flows: ARS regulatory correspondence, sick leave certificates, resident admission files, supplier invoices outside Yooz scope. A 2026 project has been initiated but is not yet live." },
   { name: "IT Helpdesk Ticketing Tool", severity: "orange" as const,
-    desc: "BlueKanGo is currently being misused as an IT support channel — it was not designed for this purpose. The absence of an ITIL-compliant tool severely limits DSI responsiveness, escalation tracking, and SLA measurement." },
+    desc: "Qualineo is currently being misused as an IT support channel — it was not designed for this purpose. The absence of an ITIL-compliant tool severely limits DSI responsiveness, escalation tracking, and SLA measurement." },
   { name: "FP&A / Budgeting Tool", severity: "orange" as const,
     desc: "No FP&A tool in France. Group budget and reforecast are managed entirely in Excel by the CFO team. No real-time scenario modeling, no automated variance analysis, no bottom-up consolidation from residence level." },
 ];
@@ -429,71 +429,47 @@ const ExecutiveSection = ({ isMobile = false }: { isMobile?: boolean }) => {
         <h1 style={h1Style}>Executive Summary</h1>
       </div>
 
-      {/* Maturity banner */}
-      <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 24, marginBottom: 16 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px" }}>IT Maturity Assessment — France</p>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 20px" }}>
-          France concentrates the most significant challenges identified in this audit. The application ecosystem is highly fragmented, shadow IT is present at multiple layers of the stack, and the absence of governance translates into a deep organizational dysfunction in how IT tools are selected, deployed, and sustained over time.
-        </p>
-        <div style={{ ...g.col2(isMobile), gap: 12 }}>
-          {[
-            { label: "DIGITAL MATURITY",  verdict: "Fragile", detail: "Undocumented ESB • pervasive shadow IT • ageing LAN network • single developer dependency on data flows", color: DS.darkRed, bg: DS.redBg },
-            { label: "FINANCIAL MATURITY", verdict: "Low",     detail: "No monthly financial close • structural accounting backlog • Excel-driven group consolidation by a single person", color: DS.darkRed, bg: DS.redBg },
-          ].map(m => (
-            <div key={m.label} style={{ backgroundColor: m.bg, borderRadius: 8, padding: 16 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: m.color, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>{m.label}</p>
-              <p style={{ fontSize: 18, fontWeight: 800, color: m.color, margin: "0 0 6px" }}>{m.verdict}</p>
-              <p style={{ fontSize: 12, color: DS.textGrey, margin: 0, lineHeight: 1.5 }}>{m.detail}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* KPI strip */}
-      <div style={{ ...g.col4(isMobile), gap: 10, marginBottom: 16 }}>
-        {[
-          { value: "400K€+", label: "IT investments with no measured return", color: DS.darkRed, bg: DS.redBg },
-          { value: "4–5 FTE", label: "Mobilized on manual bank reconciliation", color: DS.saddleBrown, bg: DS.amberBg },
-          { value: "20%",    label: "Residences compliant with ARS deadline", color: DS.darkRed, bg: DS.redBg },
-          { value: "5–10 FTE", label: "Recoverable through quick-win automation", color: DS.forestMed, bg: DS.lightGrey },
-        ].map(k => (
-          <div key={k.label} style={{ backgroundColor: k.bg, borderRadius: 10, padding: 16, textAlign: "center" }}>
-            <p style={{ fontSize: 28, fontWeight: 800, color: k.color, margin: "0 0 6px" }}>{k.value}</p>
-            <p style={{ fontSize: 12, color: DS.textGrey, margin: 0, lineHeight: 1.4 }}>{k.label}</p>
-          </div>
-        ))}
-      </div>
-
       {/* 8 Highlights */}
       <p style={{ ...labelStyle, marginBottom: 12 }}>8 Key Findings</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {HIGHLIGHTS.map(h => {
           const isOpen = openId === h.id;
           const isOrange = h.severity === "orange";
           const borderColor = isOrange ? DS.amber : DS.darkRed;
-          const bgColor     = isOrange ? DS.amberBg : DS.redBg;
           const textColor   = isOrange ? DS.saddleBrown : DS.darkRed;
+          // First ~120 chars as preview
+          const preview = h.content.slice(0, 160).trimEnd() + "…";
 
           return (
-            <div key={h.id} style={{ borderRadius: 10, border: `1.5px solid ${isOpen ? borderColor : DS.border}`, overflow: "hidden", backgroundColor: DS.white, transition: "border-color 0.15s" }}>
-              <button
-                onClick={() => toggle(h.id)}
-                style={{ width: "100%", display: "flex", alignItems: "flex-start", gap: 12, padding: "15px 20px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-              >
-                <span style={{ fontSize: 11, fontWeight: 800, color: DS.textGrey, width: 22, flexShrink: 0, paddingTop: 2 }}>{h.id}</span>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: isOrange ? DS.amber : DS.darkRed, flexShrink: 0, marginTop: 4 }} />
-                <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: DS.deepForest, lineHeight: 1.4 }}>{h.title}</span>
-                <span style={{ color: DS.textGrey, flexShrink: 0, paddingTop: 1 }}>{isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>
-              </button>
+            <div key={h.id} style={{ backgroundColor: DS.white, borderRadius: 10, border: `1px solid ${DS.border}`, padding: "20px 24px", borderLeft: `3px solid ${borderColor}` }}>
+              {/* Header row */}
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: DS.textGrey, flexShrink: 0, paddingTop: 2, minWidth: 20 }}>{h.id}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: DS.deepForest, margin: "0 0 8px", lineHeight: 1.35 }}>{h.title}</p>
+                  {/* Preview — always visible */}
+                  <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.7, margin: 0 }}>
+                    {isOpen ? h.content : preview}
+                  </p>
+                </div>
+              </div>
+
+              {/* Expanded content */}
               {isOpen && (
-                <div style={{ padding: "0 20px 20px 20px", backgroundColor: bgColor, borderTop: `1px solid ${borderColor}33` }}>
-                  <p style={{ fontSize: 14, color: DS.deepForest, lineHeight: 1.8, margin: "16px 0 14px" }}>{h.content}</p>
-                  <div style={{ backgroundColor: DS.white, borderRadius: 8, padding: "14px 16px", border: `1px solid ${borderColor}33` }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: textColor, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Business Impact</p>
-                    <p style={{ fontSize: 13, color: DS.deepForest, lineHeight: 1.65, margin: 0 }}>{h.impact}</p>
-                  </div>
+                <div style={{ marginLeft: 32, marginTop: 12, paddingTop: 12, borderTop: `1px solid ${DS.border}` }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: textColor, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>Business Impact</p>
+                  <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{h.impact}</p>
                 </div>
               )}
+
+              {/* Read more / Show less */}
+              <button
+                onClick={() => toggle(h.id)}
+                style={{ marginLeft: 32, marginTop: 10, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 5 }}
+              >
+                <span style={{ fontSize: 12, fontWeight: 600, color: DS.forestMed }}>{isOpen ? "Show less" : "Read more"}</span>
+                <span style={{ color: DS.forestMed }}>{isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</span>
+              </button>
             </div>
           );
         })}
@@ -593,7 +569,7 @@ const AI_LONGTERM = [
   },
   {
     title: "Carer-to-Resident Ratio Predictive Alerts",
-    detail: "Detect in advance residences at risk of regulatory non-compliance on staffing ratios. Enable proactive scheduling adjustments before ARS inspection windows.",
+    detail: "Detect in advance residences legacy of regulatory non-compliance on staffing ratios. Enable proactive scheduling adjustments before ARS inspection windows.",
   },
   {
     title: "Partner Residence Matching Engine",
@@ -614,9 +590,9 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [subTab, setSubTab] = useState<"architecture" | "mdm" | "target">("architecture");
 
   const SUB_TABS = [
-    { id: "architecture" as const, label: "Current Architecture" },
-    { id: "mdm"          as const, label: "Master Data Gaps"     },
-    { id: "target"       as const, label: "Target Architecture"  },
+    { id: "architecture" as const, label: "Current Architecture", desc: "ESB data flow, fragility risks and infrastructure gaps" },
+    { id: "mdm"          as const, label: "Master Data Gaps",      desc: "4 missing master references blocking any BI initiative" },
+    { id: "target"       as const, label: "Target Architecture",   desc: "Medallion model — Bronze, Silver and Gold data layers" },
   ];
 
   const ESB_SOURCES = ["Salesforce", "Sage", "Agesoft", "Lucas", "Kyriba"];
@@ -628,7 +604,31 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
         <h1 style={h1Style}>Data</h1>
       </div>
 
-      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} isMobile={isMobile} />
+      {/* Intro */}
+      <div style={{ ...card, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, color: DS.textGrey, lineHeight: 1.8, margin: 0 }}>
+          The Group's data infrastructure is currently built around a single in-house ESB, developed and maintained by <strong style={{ color: DS.deepForest }}>one developer</strong>, with no documentation, no monitoring, and no redundancy. All five core systems — Salesforce, Sage, Agesoft, Lucas and Kyriba — feed into this single integration layer, which in turn is supposed to power Power BI dashboards that remain on standby. Four critical master data references are absent: no shared residence identifier, no unified supplier reference, no consolidated employee master, and no reconciled resident record. Without these foundations, <strong style={{ color: DS.deepForest }}>no reliable reporting, BI, or AI initiative can be built</strong>. The target architecture follows a medallion model — Bronze ingestion, Silver master data, Gold reporting — and must be built sequentially.
+        </p>
+      </div>
+
+      {/* Nav cards */}
+      <div style={{ ...g.col3(isMobile), gap: 10, marginBottom: 24 }}>
+        {SUB_TABS.map(t => {
+          const isActive = subTab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setSubTab(t.id)}
+              style={{ textAlign: "left", padding: "16px 18px", borderRadius: 10, border: `1.5px solid ${isActive ? DS.deepForest : DS.border}`, backgroundColor: isActive ? DS.deepForest : DS.white, cursor: "pointer", transition: "all 0.15s" }}
+              onMouseEnter={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.borderColor = DS.sage; } }}
+              onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLButtonElement).style.borderColor = DS.border; } }}
+            >
+              <p style={{ fontSize: 13, fontWeight: 700, color: isActive ? DS.white : DS.deepForest, margin: "0 0 4px" }}>{t.label}</p>
+              <p style={{ fontSize: 12, color: isActive ? DS.sage : DS.textGrey, margin: 0, lineHeight: 1.5 }}>{t.desc}</p>
+            </button>
+          );
+        })}
+      </div>
 
       {/* ── Current Architecture ── */}
       {subTab === "architecture" && (
@@ -660,9 +660,9 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
               </div>
               {/* Power BI */}
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <div style={{ backgroundColor: DS.redBg, border: `2px solid ${DS.darkRed}44`, borderRadius: 10, padding: "14px 32px", textAlign: "center" }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: DS.darkRed, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 4px" }}>Power BI / MS Fabric</p>
-                  <p style={{ fontSize: 12, color: DS.darkRed, margin: 0 }}>On standby — no validated data sources</p>
+                <div style={{ backgroundColor: DS.white, border: `1.5px solid ${DS.border}`, borderRadius: 10, padding: "14px 32px", textAlign: "center" }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: DS.deepForest, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 4px" }}>Power BI / MS Fabric</p>
+                  <p style={{ fontSize: 12, color: DS.textGrey, margin: 0 }}>On standby — no validated data sources</p>
                 </div>
               </div>
             </div>
@@ -670,19 +670,17 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
           {/* Risk callouts */}
           <div style={{ ...g.col2(isMobile), gap: 12 }}>
             {[
-              { label: "Single point of failure", detail: "The entire group data pipeline relies on one developer with no backup, no documentation, and no high-availability setup. Any absence creates a full reporting blackout.", sev: "red" as const },
-              { label: "No real-time monitoring", detail: "No alerting system exists on data flow failures. A broken sync between Agesoft and the DataHub can go unnoticed for days before being detected manually.", sev: "red" as const },
-              { label: "Manual BI exports", detail: "Power BI / MS Fabric dashboards are fed through manual exports — there is no automated pipeline from the DataHub to the reporting layer.", sev: "orange" as const },
-              { label: "200K€+ invested in BI with no output", detail: "Multiple BI investment rounds have been made without a stable data foundation. Dashboards remain on standby pending a reliable and documented source layer.", sev: "orange" as const },
-            ].map(r => {
-              const isRed = r.sev === "red";
-              return (
-                <div key={r.label} style={{ backgroundColor: isRed ? DS.redBg : DS.amberBg, borderRadius: 10, padding: 16, border: `1px solid ${isRed ? DS.darkRed + "33" : DS.amber + "33"}` }}>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: isRed ? DS.darkRed : DS.saddleBrown, margin: "0 0 6px" }}>{r.label}</p>
-                  <p style={{ fontSize: 12, color: DS.textGrey, margin: 0, lineHeight: 1.6 }}>{r.detail}</p>
-                </div>
-              );
-            })}
+              { label: "Single point of failure", detail: "The entire group data pipeline relies on one developer with no backup, no documentation, and no high-availability setup. Any absence creates a full reporting blackout." },
+              { label: "No real-time monitoring", detail: "No alerting system exists on data flow failures. A broken sync between Agesoft and the DataHub can go unnoticed for days before being detected manually." },
+              { label: "Manual BI exports", detail: "Power BI / MS Fabric dashboards are fed through manual exports — there is no automated pipeline from the DataHub to the reporting layer." },
+              { label: "200K€+ invested in BI with no output", detail: "Multiple BI investment rounds have been made without a stable data foundation. Dashboards remain on standby pending a reliable and documented source layer." },
+            ].map(r => (
+              <div key={r.label} style={{ backgroundColor: DS.white, borderRadius: 10, padding: 16, border: `1px solid ${DS.border}` }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest, margin: "0 0 6px" }}>{r.label}</p>
+                <p style={{ fontSize: 12, color: DS.textGrey, margin: 0, lineHeight: 1.6 }}>{r.detail}</p>
+              </div>
+            ))}
+          </div>
           </div>
         </div>
       )}
@@ -693,27 +691,23 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
           <p style={{ fontSize: 14, color: DS.textGrey, lineHeight: 1.7, margin: "0 0 8px" }}>
             No master data management system exists across the Group. Each application has independently generated its own identifiers with no cross-reference table between systems. This is the single most critical blocker for any BI, reporting, or AI initiative.
           </p>
-          {MDM_GAPS.map(g => {
-            const isRed = g.severity === "red";
-            return (
-              <div key={g.ref} style={{ backgroundColor: DS.white, borderRadius: 10, border: `1.5px solid ${isRed ? DS.darkRed + "44" : DS.amber + "44"}`, overflow: "hidden" }}>
-                <div style={{ padding: "14px 20px", backgroundColor: isRed ? DS.redBg : DS.amberBg, display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: isRed ? DS.darkRed : DS.amber }} />
-                  <p style={{ fontSize: 14, fontWeight: 700, color: isRed ? DS.darkRed : DS.saddleBrown, margin: 0 }}>{g.ref}</p>
+          {MDM_GAPS.map(g => (
+            <div key={g.ref} style={{ backgroundColor: DS.white, borderRadius: 10, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
+              <div style={{ padding: "14px 20px", backgroundColor: DS.lightGrey, borderBottom: `1px solid ${DS.border}` }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: DS.deepForest, margin: 0 }}>{g.ref}</p>
+              </div>
+              <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: DS.textGrey, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Finding</p>
+                  <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{g.detail}</p>
                 </div>
-                <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
-                  <div>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Finding</p>
-                    <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{g.detail}</p>
-                  </div>
-                  <div style={{ borderLeft: isMobile ? "none" : `1px solid ${DS.border}`, borderTop: isMobile ? `1px solid ${DS.border}` : "none", paddingLeft: isMobile ? 0 : 16, paddingTop: isMobile ? 16 : 0 }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Business Impact</p>
-                    <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{g.impact}</p>
-                  </div>
+                <div style={{ borderLeft: isMobile ? "none" : `1px solid ${DS.border}`, borderTop: isMobile ? `1px solid ${DS.border}` : "none", paddingLeft: isMobile ? 0 : 16, paddingTop: isMobile ? 16 : 0 }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: DS.textGrey, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Business Impact</p>
+                  <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{g.impact}</p>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
 
@@ -780,7 +774,7 @@ const AISection = ({ isMobile = false }: { isMobile?: boolean }) => {
             { n: "01", text: "Define the Group AI usage policy: authorized data types, validated tools, prohibited use cases (resident data, health records, personal data under GDPR)." },
             { n: "02", text: "Appoint a Group AI lead (within DSI or a dedicated function) to steer experiments, track ROI, and manage vendor relationships." },
             { n: "03", text: "Establish a quarterly AI committee to validate use cases, review outcomes, and prioritize the roadmap." },
-            { n: "04", text: "Deploy a short prompt engineering training module (4h) for all office-based staff — delivered via RiseUp." },
+            { n: "04", text: "Deploy a short prompt engineering training module (4h) for all office-based staff — delivered via 360Learning." },
             { n: "05", text: "Frame GDPR compliance on health and resident data before any AI use case touches care records or clinical data." },
           ].map(g => (
             <div key={g.n} style={{ display: "flex", gap: 14, alignItems: "flex-start", padding: "12px 16px", backgroundColor: DS.lightGrey, borderRadius: 8 }}>
@@ -961,7 +955,7 @@ const FINANCE_FACTURATION = {
     "Billing rules for Section Soins and Tarif Dépendance are not centralized in Agesoft. Each residence manages its own configuration, leading to inconsistencies, billing errors, and frequent manual corrections that delay the accounting close.",
     "ARS and Departmental authority declarations are produced 100% manually with no digital tools. As of March 31, 2026, only 20% of residences had submitted declarations on time. This structural non-compliance creates a direct risk to the Group's funding allocations.",
     "Turbo and Kyriba co-exist for resident payment collection — Turbo is the legacy tool, Kyriba is the target. The migration has no confirmed end date, forcing the finance team to operate two systems in parallel.",
-    "CIEL is still used for manual billing on a residual perimeter that has not been migrated. This creates a third billing system in the finance stack with no integration to Sage.",
+    "Sage 50 is still used for manual billing on a residual perimeter that has not been migrated. This creates a third billing system in the finance stack with no integration to Sage.",
     "Institutional invoice verification (B2B) is 100% manual before sending — 30 minutes to 4 hours per client depending on complexity, with no automated matching against the Salesforce contract.",
   ],
   recommandations: [
@@ -1014,7 +1008,7 @@ const EHPAD_OVERVIEW: { process: string; status: ProcStatus; tools: string; issu
   { process: "Admission & care contract",       status: "partial", tools: "Agesoft, Salesforce, Excel", issue: "Requests tracked in Excel — no Salesforce/Agesoft bridge"        },
   { process: "Room availability visibility",    status: "ko",      tools: "Agesoft, phone",             issue: "No real-time data — requires calling each residence director"     },
   { process: "Care staff planning & staffing",  status: "ko",      tools: "Excel",                      issue: "All scheduling in Excel — no group tool, no inter-residence pool" },
-  { process: "Quality & ARS compliance",        status: "partial", tools: "BlueKanGo, manual",          issue: "Audit modules partially configured — ARS tracking still manual"   },
+  { process: "Quality & ARS compliance",        status: "partial", tools: "Qualineo, manual",          issue: "Audit modules partially configured — ARS tracking still manual"   },
 ];
 
 const EHPAD_ADMISSION = {
@@ -1077,21 +1071,21 @@ const EHPAD_PLANNING = {
 
 const EHPAD_QUALITE = {
   title: "Quality & ARS Compliance",
-  subtitle: "Quality management and ARS regulatory compliance across 120 residences — partially digitized via BlueKanGo, with structural gaps in process and tooling.",
-  context: "The Group uses BlueKanGo as its quality management tool — covering EHPAD internal audits, adverse event (événement indésirable) reporting, and ARS compliance tracking. BlueKanGo is partially configured and unevenly used across residences. It is also being misused as an IT helpdesk, which degrades its utility for quality purposes and creates tool confusion for users.",
+  subtitle: "Quality management and ARS regulatory compliance across 120 residences — partially digitized via Qualineo, with structural gaps in process and tooling.",
+  context: "The Group uses Qualineo as its quality management tool — covering EHPAD internal audits, adverse event (événement indésirable) reporting, and ARS compliance tracking. Qualineo is partially configured and unevenly used across residences. It is also being misused as an IT helpdesk, which degrades its utility for quality purposes and creates tool confusion for users.",
   dysfonctionnements: [
-    "BlueKanGo's audit modules are only partially configured. EHPAD-specific audit templates do not cover all ARS inspection dimensions, and the tool is used inconsistently — some residences use it rigorously, others barely at all.",
-    "BlueKanGo is currently used as an informal IT helpdesk by residence teams. This misuse clutters the quality database with non-quality events, and creates confusion between IT support requests and genuine quality incidents.",
+    "Qualineo's audit modules are only partially configured. EHPAD-specific audit templates do not cover all ARS inspection dimensions, and the tool is used inconsistently — some residences use it rigorously, others barely at all.",
+    "Qualineo is currently used as an informal IT helpdesk by residence teams. This misuse clutters the quality database with non-quality events, and creates confusion between IT support requests and genuine quality incidents.",
     "Adverse events (événements indésirables) are not systematically recorded across all residences. Declarations depend on individual initiative rather than a structured, mandatory workflow — creating blind spots in the Group's safety monitoring.",
     "ARS inspection preparation relies on manual document gathering across multiple local systems and paper archives. There is no structured digital checklist or shared preparation protocol at group level.",
     "The Group has no consolidated quality dashboard. There is no real-time visibility on audit scores, adverse event frequency, or ARS compliance status across the 120 residences.",
   ],
   recommandations: [
-    { type: "QUICK WIN" as const, text: "Clean up BlueKanGo immediately — remove all IT helpdesk misuse, reassign those users to a proper IT ticketing tool, and reconfigure the quality modules for EHPAD-specific audit coverage." },
-    { type: "QUICK WIN" as const, text: "Deploy a mandatory adverse event (EI) declaration workflow in BlueKanGo — zero-tolerance policy for unreported events, supported by a short training module on RiseUp." },
+    { type: "QUICK WIN" as const, text: "Clean up Qualineo immediately — remove all IT helpdesk misuse, reassign those users to a proper IT ticketing tool, and reconfigure the quality modules for EHPAD-specific audit coverage." },
+    { type: "QUICK WIN" as const, text: "Deploy a mandatory adverse event (EI) declaration workflow in Qualineo — zero-tolerance policy for unreported events, supported by a short training module on 360Learning." },
     { type: "QUICK WIN" as const, text: "Create a standardized ARS inspection preparation checklist and document repository in the GED/OCR tool — shared across all residences, updated centrally." },
-    { type: "LONG TERM" as const, text: "Build a consolidated quality and compliance dashboard from BlueKanGo + Agesoft data: audit scores per residence, EI frequency and trends, ARS compliance status, and inspection calendar." },
-    { type: "LONG TERM" as const, text: "Connect BlueKanGo quality events to the AI alert layer — detect early signals of quality deterioration (rising EI rate, declining audit scores) before they escalate to ARS-reportable incidents." },
+    { type: "LONG TERM" as const, text: "Build a consolidated quality and compliance dashboard from Qualineo + Agesoft data: audit scores per residence, EI frequency and trends, ARS compliance status, and inspection calendar." },
+    { type: "LONG TERM" as const, text: "Connect Qualineo quality events to the AI alert layer — detect early signals of quality deterioration (rising EI rate, declining audit scores) before they escalate to ARS-reportable incidents." },
   ],
 };
 
@@ -1100,7 +1094,7 @@ const HR_OVERVIEW: { process: string; status: ProcStatus; tools: string; issue: 
   { process: "Recruitment",          status: "partial", tools: "Lucas, email, Excel",  issue: "Lucas ATS deployed but not used — teams revert to email and spreadsheets"  },
   { process: "Onboarding",           status: "partial", tools: "PILA, Lucas",          issue: "IT kit not standardized — access, email, device vary by residence"          },
   { process: "Payroll administration",status: "partial", tools: "Lucas, Cegid Paie",   issue: "Lucas/Cegid interface broken — monthly variable data entered manually"       },
-  { process: "Training",             status: "partial", tools: "RiseUp, Lucas",        issue: "RiseUp and Lucas disconnected — completions not visible in employee record"  },
+  { process: "Training",             status: "partial", tools: "360Learning, Lucas",        issue: "360Learning and Lucas disconnected — completions not visible in employee record"  },
 ];
 
 const HR_RECRUITMENT = {
@@ -1138,7 +1132,7 @@ const HR_ONBOARDING = {
     { type: "QUICK WIN" as const, text: "Standardize the Day 1 IT kit for all new hires — professional email, device assignment, and application access as a mandatory PILA task completed before the first day of work." },
     { type: "QUICK WIN" as const, text: "Roll out professional email addresses to all frontline care workers — this is a prerequisite for MFA, Microsoft 365 adoption, and secure identity management across the network." },
     { type: "QUICK WIN" as const, text: "Enforce PILA task completion tracking — generate a weekly report for HR managers on incomplete onboarding steps, with escalation for residences below 90% completion." },
-    { type: "LONG TERM" as const, text: "Build a structured care-role onboarding track in RiseUp — mandatory modules (care protocols, resident rights, emergency procedures) auto-assigned on Day 1 in Lucas, completion tracked in the employee record." },
+    { type: "LONG TERM" as const, text: "Build a structured care-role onboarding track in 360Learning — mandatory modules (care protocols, resident rights, emergency procedures) auto-assigned on Day 1 in Lucas, completion tracked in the employee record." },
     { type: "LONG TERM" as const, text: "Connect PILA offboarding to Entra ID for automated access revocation — ensure zero access remains active for departed employees within 24h of departure confirmation." },
   ],
 };
@@ -1163,20 +1157,20 @@ const HR_PAYROLL = {
 
 const HR_TRAINING = {
   title: "Training & Development",
-  subtitle: "RiseUp LMS in place — disconnected from Lucas HRIS. Training completions not visible in employee records. Mandatory care certifications not consolidated at group level.",
-  context: "The Group uses RiseUp as its LMS for online training delivery and Lucas as its HRIS for training plan management. The two tools are not connected. Training completion data in RiseUp is not reflected in the Lucas employee record, making it impossible to have a unified view of each employee's certification and development status. Mandatory care certifications (fire safety, AFGSU, care protocols) are tracked locally and inconsistently.",
+  subtitle: "360Learning LMS in place — disconnected from Lucas HRIS. Training completions not visible in employee records. Mandatory care certifications not consolidated at group level.",
+  context: "The Group uses 360Learning as its LMS for online training delivery and Lucas as its HRIS for training plan management. The two tools are not connected. Training completion data in 360Learning is not reflected in the Lucas employee record, making it impossible to have a unified view of each employee's certification and development status. Mandatory care certifications (fire safety, AFGSU, care protocols) are tracked locally and inconsistently.",
   dysfonctionnements: [
-    "RiseUp and Lucas are not connected — training completions recorded in RiseUp are not visible in the Lucas employee dossier. HR managers must manually cross-reference the two systems to produce any training compliance report.",
+    "360Learning and Lucas are not connected — training completions recorded in 360Learning are not visible in the Lucas employee dossier. HR managers must manually cross-reference the two systems to produce any training compliance report.",
     "The annual training plan is not integrated into Lucas HR KPIs or the performance management cycle. Training budget per residence is not tracked systematically — making it impossible to measure training ROI or optimize spend across the network.",
     "Mandatory regulatory training compliance (fire safety, AFGSU first aid, care protocol certifications) is tracked locally by each residence in Excel. There is no consolidated group dashboard on certification compliance, and expiry dates are not monitored proactively.",
-    "The RiseUp course library is not organized around EHPAD-specific care roles. Generic courses are available, but residence-specific care protocols, ARS regulatory requirements, and mandatory certification renewal paths are not structured as learning pathways in the platform.",
+    "The 360Learning course library is not organized around EHPAD-specific care roles. Generic courses are available, but residence-specific care protocols, ARS regulatory requirements, and mandatory certification renewal paths are not structured as learning pathways in the platform.",
   ],
   recommandations: [
-    { type: "QUICK WIN" as const, text: "Connect RiseUp to Lucas via API or SCORM/xAPI integration — training completions and certification statuses automatically visible in the Lucas employee dossier." },
-    { type: "QUICK WIN" as const, text: "Build a mandatory training compliance dashboard in RiseUp: certification expiry tracking per employee, compliance rate per residence, and automated alerts for upcoming expiries." },
-    { type: "QUICK WIN" as const, text: "Structure the RiseUp course library into role-based learning pathways — care worker, nurse, residence director, administrative staff — with mandatory and optional modules per role." },
-    { type: "LONG TERM" as const, text: "Integrate training into the annual performance management cycle in Lucas — training completion feeds into performance reviews, and development needs identified in reviews trigger automatic RiseUp course assignments." },
-    { type: "LONG TERM" as const, text: "Deploy AI-assisted personalized learning paths in RiseUp — adaptive content recommendations based on role, certification gaps, and care protocol updates. Reduce certification non-compliance through proactive nudging." },
+    { type: "QUICK WIN" as const, text: "Connect 360Learning to Lucas via API or SCORM/xAPI integration — training completions and certification statuses automatically visible in the Lucas employee dossier." },
+    { type: "QUICK WIN" as const, text: "Build a mandatory training compliance dashboard in 360Learning: certification expiry tracking per employee, compliance rate per residence, and automated alerts for upcoming expiries." },
+    { type: "QUICK WIN" as const, text: "Structure the 360Learning course library into role-based learning pathways — care worker, nurse, residence director, administrative staff — with mandatory and optional modules per role." },
+    { type: "LONG TERM" as const, text: "Integrate training into the annual performance management cycle in Lucas — training completion feeds into performance reviews, and development needs identified in reviews trigger automatic 360Learning course assignments." },
+    { type: "LONG TERM" as const, text: "Deploy AI-assisted personalized learning paths in 360Learning — adaptive content recommendations based on role, certification gaps, and care protocol updates. Reduce certification non-compliance through proactive nudging." },
   ],
 };
 
@@ -1406,7 +1400,7 @@ const GANTT_ITEMS: GanttItem[] = [
   { id:"w1-1", ws:1, phase:"P1", start:1,  end:3,  label:"Salesforce repair",              detail:"Repair Outlook sync, re-enable email sending, reconfigure lead scoring threshold. Appoint a certified Salesforce integration partner.", tools:"Salesforce" },
   { id:"w1-2", ws:1, phase:"P1", start:1,  end:4,  label:"Lucas HRIS reactivation",        detail:"Deploy a change management and training plan to reactivate Lucas across all residences. Start with recruitment and absence modules.", tools:"Lucas" },
   { id:"w1-3", ws:1, phase:"P1", start:2,  end:3,  label:"DocuSign & access audit",        detail:"Revoke the 7 active admin accounts belonging to departed employees. Audit all DocuSign licenses and clean up inactive accounts.", tools:"DocuSign, Entra ID" },
-  { id:"w1-4", ws:1, phase:"P1", start:3,  end:6,  label:"Turbo decommission",             detail:"Complete Kyriba migration for all residences. Set and enforce a firm Turbo decommission date. Eliminate CIEL on residual scope.", tools:"Kyriba, Turbo, Sage" },
+  { id:"w1-4", ws:1, phase:"P1", start:3,  end:6,  label:"Turbo decommission",             detail:"Complete Kyriba migration for all residences. Set and enforce a firm Turbo decommission date. Eliminate Sage 50 on residual scope.", tools:"Kyriba, Turbo, Sage" },
   { id:"w1-5", ws:1, phase:"P1", start:3,  end:5,  label:"Plezi activation",               detail:"Launch Plezi B2B marketing automation. Connect to Salesforce pipeline. Deploy first nurturing flow toward referring institutions.", tools:"Plezi, Salesforce" },
   { id:"w1-6", ws:1, phase:"P2", start:7,  end:10, label:"Salesforce ↔ Agesoft API",       detail:"Build the Agesoft/Salesforce API integration: real-time room availability in the commercial pipeline. Admission requests managed in Salesforce end-to-end.", tools:"Salesforce, Agesoft" },
   { id:"w1-7", ws:1, phase:"P2", start:7,  end:11, label:"WFM/scheduling deployment",      detail:"Deploy Skello or Combo as the group scheduling tool across all 120 residences. Pilot on one region, then roll out group-wide.", tools:"Skello/Combo, Lucas" },
@@ -1426,7 +1420,7 @@ const GANTT_ITEMS: GanttItem[] = [
   // WS3 — Process & Governance
   { id:"w3-1", ws:3, phase:"P1", start:1,  end:2,  label:"Monthly close calendar (D+5)",   detail:"Formalize the monthly financial close calendar with clear ownership per step, hard deadlines, and D+5 as the group delivery target for management P&L.", tools:"Sage, Excel" },
   { id:"w3-2", ws:3, phase:"P1", start:1,  end:3,  label:"ARS compliance catch-up plan",   detail:"Audit ARS declaration status across all 120 residences. Deploy a catch-up plan for overdue declarations. Formalize the annual declaration calendar.", tools:"Agesoft, manual" },
-  { id:"w3-3", ws:3, phase:"P1", start:2,  end:4,  label:"BlueKanGo reconfiguration",      detail:"Remove IT helpdesk misuse from BlueKanGo. Configure EHPAD-specific audit modules and mandatory EI declaration workflow. Deploy training via RiseUp.", tools:"BlueKanGo, RiseUp" },
+  { id:"w3-3", ws:3, phase:"P1", start:2,  end:4,  label:"Qualineo reconfiguration",      detail:"Remove IT helpdesk misuse from Qualineo. Configure EHPAD-specific audit modules and mandatory EI declaration workflow. Deploy training via 360Learning.", tools:"Qualineo, 360Learning" },
   { id:"w3-4", ws:3, phase:"P1", start:4,  end:6,  label:"IT COPIL SI launch",             detail:"Establish the Group IT Steering Committee. Monthly cadence. Define IT demand management process: request submission, DSI review, prioritization, ROI tracking.", tools:"Jira" },
   { id:"w3-5", ws:3, phase:"P2", start:7,  end:9,  label:"Admission process standardization", detail:"Move all admission requests into Salesforce. Standardize care contract templates and billing rules in Agesoft. Define commercial-to-care handoff protocol.", tools:"Salesforce, Agesoft" },
   { id:"w3-6", ws:3, phase:"P2", start:8,  end:11, label:"Purchase order process",          detail:"Deploy PO tool and enforce mandatory purchase orders for all spend above threshold. Connect to Yooz for invoice-to-PO matching.", tools:"Sage, Yooz" },
@@ -1435,7 +1429,7 @@ const GANTT_ITEMS: GanttItem[] = [
   // WS4 — AI
   { id:"w4-1", ws:4, phase:"P1", start:1,  end:2,  label:"AI governance & policy",         detail:"Define the Group AI usage policy: authorized data types, validated tools, prohibited use cases (resident health data, GDPR). Appoint the Group AI Lead.", tools:"Internal" },
   { id:"w4-2", ws:4, phase:"P1", start:2,  end:5,  label:"M365 Copilot pilot",             detail:"Deploy M365 Copilot on a 20-user pilot (Finance, HR, executive teams). Measure time savings, validate use cases, produce ROI report before group rollout.", tools:"Microsoft 365 Copilot" },
-  { id:"w4-3", ws:4, phase:"P1", start:3,  end:6,  label:"Prompt engineering training",    detail:"Deploy 4-hour prompt engineering module via RiseUp for all office-based staff. Prerequisite before any Copilot group rollout.", tools:"RiseUp" },
+  { id:"w4-3", ws:4, phase:"P1", start:3,  end:6,  label:"Prompt engineering training",    detail:"Deploy 4-hour prompt engineering module via 360Learning for all office-based staff. Prerequisite before any Copilot group rollout.", tools:"360Learning" },
   { id:"w4-4", ws:4, phase:"P2", start:7,  end:10, label:"Bank reconciliation AI",         detail:"AI-assisted payment matching between Kyriba and Sage. Prerequisite: Kyriba/Sage integration live. Target: eliminate 2–3 FTE of manual reconciliation (~150–200K€/yr).", tools:"Kyriba, Sage, AI" },
   { id:"w4-5", ws:4, phase:"P2", start:8,  end:11, label:"AI tender drafting assistant",   detail:"AI assistant trained on past winning bids for public tender memorandum drafting. Target: 60–70% reduction on ~50 days/year currently spent on documentation.", tools:"AI, SharePoint" },
   { id:"w4-6", ws:4, phase:"P2", start:10, end:13, label:"Commercial meeting AI assistant",detail:"AI transcription and structured CRM push eliminating ~1h30/day of manual Salesforce data entry per commercial manager.", tools:"AI, Salesforce" },
@@ -1477,12 +1471,12 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
       p3: ["Build Gold reporting layer — investor-ready consolidated reporting", "Deploy FP&A tool for automated budget consolidation"],
     },
     3: {
-      p1: ["Formalize monthly close calendar — D+5 target", "ARS declaration compliance audit and catch-up plan", "BlueKanGo reconfiguration — remove IT misuse, deploy EHPAD audit modules", "Launch Group IT Steering Committee (COPIL SI)"],
+      p1: ["Formalize monthly close calendar — D+5 target", "ARS declaration compliance audit and catch-up plan", "Qualineo reconfiguration — remove IT misuse, deploy EHPAD audit modules", "Launch Group IT Steering Committee (COPIL SI)"],
       p2: ["Standardize admission process end-to-end in Salesforce/Agesoft", "Deploy PO process with mandatory approval thresholds", "Automate ARS/Departmental declaration generation from Agesoft"],
       p3: ["Deploy formal group process governance framework"],
     },
     4: {
-      p1: ["Define AI governance policy and appoint Group AI Lead", "M365 Copilot pilot — 20 users, Finance and HR teams", "Deploy prompt engineering training module on RiseUp"],
+      p1: ["Define AI governance policy and appoint Group AI Lead", "M365 Copilot pilot — 20 users, Finance and HR teams", "Deploy prompt engineering training module on 360Learning"],
       p2: ["AI-assisted bank reconciliation (Kyriba/Sage)", "AI public tender drafting assistant", "Commercial meeting summary AI assistant"],
       p3: ["Salesforce Einstein — renewal risk scoring", "ARS declaration AI monitoring assistant", "Predictive occupancy AI — 3–6 month horizon"],
     },
@@ -1727,22 +1721,19 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
 
 // ─── SECTION 03 — APPLICATION MAPPING ───────────────────────────────────────
 const STATUS_CFG: Record<ToolStatus, { dot: string; label: string; labelColor: string; labelBg: string }> = {
-  ok:      { dot: "#22C55E", label: "Operational",    labelColor: DS.forestMed, labelBg: DS.lightGrey },
-  partial: { dot: "#F59E0B", label: "Partial",        labelColor: DS.saddleBrown, labelBg: DS.amberBg },
-  ko:      { dot: DS.darkRed, label: "Dysfunctional", labelColor: DS.darkRed, labelBg: DS.redBg },
-};
-
-const StatusChip = ({ status }: { status: ToolStatus }) => {
-  const c = STATUS_CFG[status];
-  return (
-    <span style={{ fontSize: 11, fontWeight: 600, color: c.labelColor, backgroundColor: c.labelBg, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>{c.label}</span>
-  );
+  ok:      { dot: "#22C55E", label: "Tool is functional and team is onboarded", labelColor: DS.forestMed,   labelBg: DS.lightGrey },
+  partial: { dot: "#F59E0B", label: "Potential duplicate or partial usage",     labelColor: DS.saddleBrown, labelBg: DS.amberBg   },
+  ko:      { dot: DS.darkRed, label: "Legacy tech impacting business",          labelColor: DS.darkRed,     labelBg: DS.redBg     },
 };
 
 const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [tab, setTab]         = useState<"inventory" | "swot" | "missing">("inventory");
-  const [filter, setFilter]   = useState<"all" | ToolStatus>("all");
   const [swotIdx, setSwotIdx] = useState(0);
+
+  // Map tool name → SWOT index for direct navigation
+  const SWOT_INDEX: Record<string, number> = Object.fromEntries(
+    SWOT_DATA.map((s, i) => [s.tool, i])
+  );
 
   const TAB_LABELS: { id: "inventory" | "swot" | "missing"; label: string }[] = [
     { id: "inventory", label: "Tool Inventory" },
@@ -1750,15 +1741,18 @@ const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
     { id: "missing",   label: "Missing Tools"  },
   ];
 
-  const filtered = filter === "all"
-    ? TOOLS_FRANCE
-    : TOOLS_FRANCE.map(cat => ({ ...cat, tools: cat.tools.filter(t => t.status === filter) }))
-                  .filter(cat => cat.tools.length > 0);
-
-  const totalOk      = TOOLS_FRANCE.flatMap(c => c.tools).filter(t => t.status === "ok").length;
-  const totalPartial = TOOLS_FRANCE.flatMap(c => c.tools).filter(t => t.status === "partial").length;
-  const totalKo      = TOOLS_FRANCE.flatMap(c => c.tools).filter(t => t.status === "ko").length;
-  const total        = totalOk + totalPartial + totalKo;
+  // Category totals
+  const CAT_TOTALS: { cat: string; total: number; ko: number; partial: number }[] = TOOLS_FRANCE.map(c => {
+    const parse = (s: string) => parseInt(s.replace(/[^0-9]/g, "")) * 1000 || 0;
+    const total   = c.tools.reduce((s, t) => s + parse(t.opex), 0);
+    const ko      = c.tools.filter(t => t.status === "ko").reduce((s, t) => s + parse(t.opex), 0);
+    const partial = c.tools.filter(t => t.status === "partial").reduce((s, t) => s + parse(t.opex), 0);
+    return { cat: c.category, total, ko, partial };
+  });
+  const grandTotal   = CAT_TOTALS.reduce((s, c) => s + c.total, 0);
+  const koTotal      = CAT_TOTALS.reduce((s, c) => s + c.ko, 0);
+  const partialTotal = CAT_TOTALS.reduce((s, c) => s + c.partial, 0);
+  const fmt = (n: number) => n >= 1000000 ? (n/1000000).toFixed(1) + "M€" : Math.round(n/1000) + "K€";
 
   const sw = SWOT_DATA[swotIdx];
 
@@ -1769,19 +1763,33 @@ const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
         <h1 style={h1Style}>Application Mapping</h1>
       </div>
 
-      {/* Summary KPIs */}
-      <div style={{ ...g.col4(isMobile), gap: 10, marginBottom: 24 }}>
-        {[
-          { value: total,        label: "Tools in scope",    color: DS.deepForest, bg: DS.lightGrey },
-          { value: totalOk,      label: "Operational",       color: DS.forestMed,      bg: DS.lightGrey    },
-          { value: totalPartial, label: "Partial / Issues",  color: DS.saddleBrown, bg: DS.amberBg  },
-          { value: totalKo,      label: "Dysfunctional",     color: DS.darkRed,     bg: DS.redBg    },
-        ].map(k => (
-          <div key={k.label} style={{ backgroundColor: k.bg, borderRadius: 10, padding: "16px 20px", textAlign: "center" }}>
-            <p style={{ fontSize: 28, fontWeight: 800, color: k.color, margin: "0 0 4px" }}>{k.value}</p>
-            <p style={{ fontSize: 12, color: DS.textGrey, margin: 0 }}>{k.label}</p>
+      {/* Intro paragraph */}
+      <div style={{ ...card, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, color: DS.textGrey, lineHeight: 1.8, margin: "0 0 16px" }}>
+          The Group operates <strong style={{ color: DS.deepForest }}>{TOOLS_FRANCE.flatMap(c => c.tools).length} tools</strong> across 7 functional domains, representing an estimated annual IT spend of <strong style={{ color: DS.deepForest }}>{fmt(grandTotal)}</strong>. Of this total, <strong style={{ color: DS.darkRed }}>{fmt(koTotal)}</strong> is allocated to tools that are dysfunctional or pending decommission, and <strong style={{ color: DS.saddleBrown }}>{fmt(partialTotal)}</strong> to tools that are only partially adopted or generating known operational issues. The rationalization opportunity — through decommissions, consolidations, and adoption programs — is estimated at <strong style={{ color: DS.deepForest }}>{fmt(koTotal + partialTotal * 0.4)}</strong> in annual savings.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0, borderRadius: 8, overflow: "hidden", border: `1px solid ${DS.border}` }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 80px 80px" : "1fr 100px 100px 100px", backgroundColor: DS.lightGrey, padding: "8px 16px" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em" }}>Domain</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>Total</span>
+            {!isMobile && <span style={{ fontSize: 11, fontWeight: 700, color: DS.darkRed, textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>Legacy</span>}
+            <span style={{ fontSize: 11, fontWeight: 700, color: DS.saddleBrown, textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>Legacy</span>
           </div>
-        ))}
+          {CAT_TOTALS.map((row, i) => (
+            <div key={row.cat} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 80px 80px" : "1fr 100px 100px 100px", padding: "9px 16px", borderTop: `1px solid ${DS.border}`, backgroundColor: DS.white }}>
+              <span style={{ fontSize: 13, color: DS.deepForest, fontWeight: 500 }}>{row.cat}</span>
+              <span style={{ fontSize: 13, color: DS.deepForest, fontWeight: 600, textAlign: "right" }}>{fmt(row.total)}</span>
+              {!isMobile && <span style={{ fontSize: 13, color: row.ko > 0 ? DS.darkRed : DS.textGrey, fontWeight: row.ko > 0 ? 600 : 400, textAlign: "right" }}>{row.ko > 0 ? fmt(row.ko) : "—"}</span>}
+              <span style={{ fontSize: 13, color: row.partial > 0 ? DS.saddleBrown : DS.textGrey, fontWeight: row.partial > 0 ? 600 : 400, textAlign: "right" }}>{row.partial > 0 ? fmt(row.partial) : "—"}</span>
+            </div>
+          ))}
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 80px 80px" : "1fr 100px 100px 100px", padding: "9px 16px", borderTop: `2px solid ${DS.border}`, backgroundColor: DS.lightGrey }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest }}>Total</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest, textAlign: "right" }}>{fmt(grandTotal)}</span>
+            {!isMobile && <span style={{ fontSize: 13, fontWeight: 700, color: DS.darkRed, textAlign: "right" }}>{fmt(koTotal)}</span>}
+            <span style={{ fontSize: 13, fontWeight: 700, color: DS.saddleBrown, textAlign: "right" }}>{fmt(partialTotal)}</span>
+          </div>
+        </div>
       </div>
 
       <SubTabBar tabs={TAB_LABELS} active={tab} onChange={setTab} isMobile={isMobile} />
@@ -1790,35 +1798,47 @@ const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
       {tab === "inventory" && (
         <div>
           {/* Filter bar */}
-          <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-            {(["all","ok","partial","ko"] as const).map(f => (
-              <button key={f} onClick={() => setFilter(f)} style={{ padding: "6px 14px", borderRadius: 20, border: `1.5px solid ${filter === f ? DS.deepForest : DS.border}`, cursor: "pointer", fontSize: 12, fontWeight: 600, backgroundColor: filter === f ? DS.deepForest : DS.white, color: filter === f ? DS.white : DS.textGrey }}>
-                {f === "all" ? "All tools" : STATUS_CFG[f].label}
-              </button>
+          {/* Legend */}
+          <div style={{ display: "flex", gap: 20, marginBottom: 16, flexWrap: "wrap" }}>
+            {(["ok","partial","ko"] as const).map(s => (
+              <div key={s} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: STATUS_CFG[s].dot, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: DS.textGrey }}>{STATUS_CFG[s].label}</span>
+              </div>
             ))}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {filtered.map(cat => (
+            {TOOLS_FRANCE.map(cat => (
               <div key={cat.category} style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
                 <div style={{ padding: "12px 20px", backgroundColor: DS.deepForest }}>
                   <p style={{ fontSize: 12, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>{cat.category}</p>
                 </div>
                 <div style={{ padding: "8px 0" }}>
-                  {cat.tools.map((t, i) => (
-                    <div key={t.name} style={{ display: "flex", alignItems: "flex-start", gap: 14, padding: "10px 20px", borderBottom: i < cat.tools.length - 1 ? `1px solid ${DS.lightGrey}` : "none" }}>
-                      <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: STATUS_CFG[t.status].dot, flexShrink: 0, marginTop: 5 }} />
+                  {cat.tools.map((t, i) => {
+                    const swotI = SWOT_INDEX[t.name];
+                    const hasSwot = swotI !== undefined;
+                    return (
+                    <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 20px", borderBottom: i < cat.tools.length - 1 ? `1px solid ${DS.lightGrey}` : "none" }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: STATUS_CFG[t.status].dot, flexShrink: 0 }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest }}>{t.name}</span>
-                        <span style={{ fontSize: 12, color: DS.textGrey, marginLeft: 8 }}>{t.desc}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest }}>{t.name}</span>
+                          {hasSwot && (
+                            <button
+                              onClick={() => { setSwotIdx(swotI); setTab("swot"); }}
+                              style={{ display: "inline-flex", alignItems: "center", gap: 4, background: DS.lightGrey, border: `1px solid ${DS.border}`, borderRadius: 6, cursor: "pointer", padding: "2px 8px" }}
+                            >
+                              <span style={{ fontSize: 11, fontWeight: 600, color: DS.forestMed }}>SWOT analysis</span>
+                              <ChevronRight size={11} color={DS.forestMed} />
+                            </button>
+                          )}
+                        </div>
+                        <span style={{ fontSize: 12, color: DS.textGrey }}>{t.desc}</span>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                        {t.opex !== "included" && t.opex !== "outsourced" && (
-                          <span style={{ fontSize: 11, color: DS.textGrey, fontWeight: 500 }}>{t.opex}/yr</span>
-                        )}
-                        <StatusChip status={t.status} />
-                      </div>
+                      <span style={{ fontSize: 12, color: DS.textGrey, fontWeight: 500, flexShrink: 0 }}>{t.opex}/yr</span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
