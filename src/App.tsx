@@ -681,7 +681,6 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
               </div>
             ))}
           </div>
-          </div>
         </div>
       )}
 
