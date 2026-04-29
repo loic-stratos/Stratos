@@ -1,8 +1,7 @@
-
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   FileText, TrendingUp, Layers, Database, Settings, Zap, Target,
-  ChevronRight, ChevronDown, Clock, Home, ArrowRight
+  ChevronRight, ChevronDown, Clock, Home, ArrowRight, Menu, X
 } from "lucide-react";
 
 // ─── DESIGN SYSTEM ──────────────────────────────────────────────────────────
@@ -593,7 +592,7 @@ const AI_LONGTERM = [
 ];
 
 // ─── SECTION 04 — DATA ───────────────────────────────────────────────────────
-const DataSection = () => {
+const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [subTab, setSubTab] = useState<"architecture" | "mdm" | "target">("architecture");
 
   const SUB_TABS = [
@@ -611,13 +610,7 @@ const DataSection = () => {
         <h1 style={h1Style}>Data</h1>
       </div>
 
-      <div style={{ display: "flex", gap: 6, marginBottom: 20, borderBottom: `1px solid ${DS.border}`, paddingBottom: 0 }}>
-        {SUB_TABS.map(t => (
-          <button key={t.id} onClick={() => setSubTab(t.id)} style={{ padding: "10px 18px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: subTab === t.id ? DS.deepForest : "transparent", color: subTab === t.id ? DS.white : DS.textGrey }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} isMobile={isMobile} />
 
       {/* ── Current Architecture ── */}
       {subTab === "architecture" && (
@@ -1170,7 +1163,7 @@ const HR_TRAINING = {
 };
 
 // ─── SECTION 05 — PROCESSES ───────────────────────────────────────────────────
-const ProcessSection = () => {
+const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [domain, setDomain] = useState<"commercial" | "finance" | "ehpad" | "rh">("commercial");
   const [commTab,  setCommTab]  = useState<"overview" | "fieldsales" | "marches" | "partenaires">("overview");
   const [finTab,   setFinTab]   = useState<"overview" | "achats" | "facturation" | "paie" | "reporting">("overview");
@@ -1230,26 +1223,13 @@ const ProcessSection = () => {
         <h1 style={h1Style}>Processes</h1>
       </div>
 
-      {/* Domain selector */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        {DOMAINS.map(d => (
-          <button key={d.id} onClick={() => setDomain(d.id)} style={{ padding: "10px 22px", borderRadius: 8, border: `1.5px solid ${domain === d.id ? DS.deepForest : DS.border}`, cursor: "pointer", fontSize: 13, fontWeight: 700, backgroundColor: domain === d.id ? DS.deepForest : DS.white, color: domain === d.id ? DS.white : DS.textGrey }}>
-            {d.label}
-          </button>
-        ))}
-      </div>
+      <SubTabBar tabs={DOMAINS} active={domain} onChange={setDomain} isMobile={isMobile} />
 
       {/* COMMERCIAL */}
       {domain === "commercial" && (
         <div>
           {/* Sub-tab nav */}
-          <div style={{ display: "flex", gap: 6, marginBottom: 20, borderBottom: `1px solid ${DS.border}` }}>
-            {COMM_TABS.map(t => (
-              <button key={t.id} onClick={() => setCommTab(t.id)} style={{ padding: "9px 16px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: commTab === t.id ? DS.deepForest : "transparent", color: commTab === t.id ? DS.white : DS.textGrey }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <SubTabBar tabs={COMM_TABS} active={commTab} onChange={setCommTab} isMobile={isMobile} />
 
           {commTab === "overview" && (
             <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
@@ -1286,19 +1266,18 @@ const ProcessSection = () => {
       {/* FINANCE */}
       {domain === "finance" && (
         <div>
-          <div style={{ display: "flex", gap: 6, marginBottom: 20, borderBottom: `1px solid ${DS.border}` }}>
-            {([
+          <SubTabBar
+            tabs={[
               { id: "overview"     as const, label: "Overview"     },
               { id: "achats"       as const, label: "Purchasing"   },
               { id: "facturation"  as const, label: "Billing"      },
               { id: "paie"         as const, label: "Payroll"      },
               { id: "reporting"    as const, label: "Reporting"    },
-            ]).map(t => (
-              <button key={t.id} onClick={() => setFinTab(t.id)} style={{ padding: "9px 16px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: finTab === t.id ? DS.deepForest : "transparent", color: finTab === t.id ? DS.white : DS.textGrey }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
+            ]}
+            active={finTab}
+            onChange={setFinTab}
+            isMobile={isMobile}
+          />
           {finTab === "overview" && (
             <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
               <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
@@ -1335,19 +1314,18 @@ const ProcessSection = () => {
       {/* EHPAD OPS */}
       {domain === "ehpad" && (
         <div>
-          <div style={{ display: "flex", gap: 6, marginBottom: 20, borderBottom: `1px solid ${DS.border}` }}>
-            {([
+          <SubTabBar
+            tabs={[
               { id: "overview"   as const, label: "Overview"         },
               { id: "admission"  as const, label: "Admission"        },
               { id: "dispo"      as const, label: "Availability"     },
               { id: "planning"   as const, label: "Planning"         },
               { id: "qualite"    as const, label: "Quality"          },
-            ]).map(t => (
-              <button key={t.id} onClick={() => setEhpadTab(t.id)} style={{ padding: "9px 16px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: ehpadTab === t.id ? DS.deepForest : "transparent", color: ehpadTab === t.id ? DS.white : DS.textGrey }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
+            ]}
+            active={ehpadTab}
+            onChange={setEhpadTab}
+            isMobile={isMobile}
+          />
           {ehpadTab === "overview" && (
             <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
               <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
@@ -1384,19 +1362,18 @@ const ProcessSection = () => {
       {/* HR */}
       {domain === "rh" && (
         <div>
-          <div style={{ display: "flex", gap: 6, marginBottom: 20, borderBottom: `1px solid ${DS.border}` }}>
-            {([
+          <SubTabBar
+            tabs={[
               { id: "overview"    as const, label: "Overview"    },
               { id: "recruitment" as const, label: "Recruitment" },
               { id: "onboarding"  as const, label: "Onboarding"  },
               { id: "payroll"     as const, label: "Payroll"     },
               { id: "training"    as const, label: "Training"    },
-            ]).map(t => (
-              <button key={t.id} onClick={() => setHrTab(t.id)} style={{ padding: "9px 16px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: hrTab === t.id ? DS.deepForest : "transparent", color: hrTab === t.id ? DS.white : DS.textGrey }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
+            ]}
+            active={hrTab}
+            onChange={setHrTab}
+            isMobile={isMobile}
+          />
           {hrTab === "overview" && (
             <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
               <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
@@ -1502,7 +1479,7 @@ const BUSINESS_OBJECTIVES = [
 ];
 
 // ─── SECTION 07 — TRANSFORMATION ─────────────────────────────────────────────
-const TransformationSection = () => {
+const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [subTab,   setSubTab]   = useState<"objectives"|"gantt"|"workstreams"|"phases">("objectives");
   const [selected, setSelected] = useState<GanttItem | null>(null);
   const [phaseFilter, setPhaseFilter] = useState<Phase | "all">("all");
@@ -1544,19 +1521,17 @@ const TransformationSection = () => {
         <h1 style={h1Style}>Transformation Plan</h1>
       </div>
 
-      {/* Sub-tabs */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 24, borderBottom: `1px solid ${DS.border}` }}>
-        {([
+      <SubTabBar
+        tabs={[
           { id:"objectives"  as const, label:"Business Objectives" },
           { id:"gantt"       as const, label:"Gantt (M1–M18)"     },
           { id:"workstreams" as const, label:"Workstreams"         },
           { id:"phases"      as const, label:"Phases P1 / P2 / P3" },
-        ]).map(t => (
-          <button key={t.id} onClick={() => setSubTab(t.id)} style={{ padding: "10px 18px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: subTab === t.id ? DS.deepForest : "transparent", color: subTab === t.id ? DS.white : DS.textGrey }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+        ]}
+        active={subTab}
+        onChange={setSubTab}
+        isMobile={isMobile}
+      />
 
       {/* ── OBJECTIVES ── */}
       {subTab === "objectives" && (
@@ -1746,7 +1721,7 @@ const StatusChip = ({ status }: { status: ToolStatus }) => {
   );
 };
 
-const CartographieSection = () => {
+const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [tab, setTab]         = useState<"inventory" | "swot" | "missing">("inventory");
   const [filter, setFilter]   = useState<"all" | ToolStatus>("all");
   const [swotIdx, setSwotIdx] = useState(0);
@@ -1791,14 +1766,7 @@ const CartographieSection = () => {
         ))}
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 20, borderBottom: `1px solid ${DS.border}`, paddingBottom: 0 }}>
-        {TAB_LABELS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "10px 18px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: tab === t.id ? DS.deepForest : "transparent", color: tab === t.id ? DS.white : DS.textGrey }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <SubTabBar tabs={TAB_LABELS} active={tab} onChange={setTab} isMobile={isMobile} />
 
       {/* ── TAB: Inventory ── */}
       {tab === "inventory" && (
@@ -2008,66 +1976,237 @@ const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => (
   </div>
 );
 
+// ─── RESPONSIVE HOOK ─────────────────────────────────────────────────────────
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 1024);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+}
+
+// ─── MOBILE SUB-TAB SELECT ───────────────────────────────────────────────────
+// Renders a <select> on mobile and regular tab buttons on desktop
+interface SubTabBarProps<T extends string> {
+  tabs: { id: T; label: string }[];
+  active: T;
+  onChange: (id: T) => void;
+  isMobile: boolean;
+}
+function SubTabBar<T extends string>({ tabs, active, onChange, isMobile }: SubTabBarProps<T>) {
+  if (isMobile) {
+    return (
+      <div style={{ marginBottom: 20 }}>
+        <select
+          value={active}
+          onChange={e => onChange(e.target.value as T)}
+          style={{
+            width: "100%",
+            padding: "10px 14px",
+            borderRadius: 8,
+            border: `1.5px solid ${DS.border}`,
+            fontSize: 14,
+            fontWeight: 600,
+            color: DS.deepForest,
+            backgroundColor: DS.white,
+            appearance: "none",
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234B5563' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 12px center",
+            cursor: "pointer",
+          }}
+        >
+          {tabs.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+        </select>
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: "flex", gap: 6, marginBottom: 20, borderBottom: `1px solid ${DS.border}` }}>
+      {tabs.map(t => (
+        <button key={t.id} onClick={() => onChange(t.id)} style={{ padding: "10px 18px", border: "none", cursor: "pointer", borderRadius: "8px 8px 0 0", fontSize: 13, fontWeight: 600, backgroundColor: active === t.id ? DS.deepForest : "transparent", color: active === t.id ? DS.white : DS.textGrey }}>
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ─── ROOT ────────────────────────────────────────────────────────────────────
 export default function AuditReport() {
   const [active, setActive] = useState("landing");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  // Close drawer on section change
+  const navigate = useCallback((id: string) => {
+    setActive(id);
+    setDrawerOpen(false);
+  }, []);
+
+  // Close drawer on ESC
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setDrawerOpen(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   if (active === "landing") {
     return (
       <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-        <LandingSection onEnter={(id) => setActive(id)} />
+        <LandingSection onEnter={(id) => navigate(id)} />
       </div>
     );
   }
+
+  const currentIndex = NAV.findIndex(n => n.id === active);
+  const prevSection  = currentIndex > 0             ? NAV[currentIndex - 1] : null;
+  const nextSection  = currentIndex < NAV.length - 1 ? NAV[currentIndex + 1] : null;
 
   const renderSection = () => {
     switch (active) {
       case "intro":          return <IntroSection />;
       case "executive":      return <ExecutiveSection />;
-      case "cartographie":   return <CartographieSection />;
-      case "data":           return <DataSection />;
+      case "cartographie":   return <CartographieSection isMobile={isMobile} />;
+      case "data":           return <DataSection isMobile={isMobile} />;
       case "ia":             return <AISection />;
-      case "processus":      return <ProcessSection />;
-      case "transformation": return <TransformationSection />;
+      case "processus":      return <ProcessSection isMobile={isMobile} />;
+      case "transformation": return <TransformationSection isMobile={isMobile} />;
       default:               return <Placeholder label={NAV.find(n => n.id === active)?.label ?? ""} />;
     }
   };
 
+  // ── Sidebar nav content (shared by sidebar + drawer) ──
+  const SidebarContent = () => (
+    <>
+      <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <button onClick={() => navigate("landing")} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 14 }}>
+          <Home size={12} color={DS.sageLight} />
+          <span style={{ fontSize: 11, color: DS.sageLight, fontWeight: 600, letterSpacing: "0.05em" }}>Back to overview</span>
+        </button>
+        <p style={{ fontSize: 15, fontWeight: 800, color: DS.white, margin: "0 0 2px", lineHeight: 1.3 }}>IT, Data & AI Audit</p>
+        <p style={{ fontSize: 12, color: DS.sageLight, margin: 0 }}>Groupement EHPAD</p>
+      </div>
+      <nav style={{ flex: 1, overflowY: "auto", padding: "12px 10px" }}>
+        {NAV.map(n => {
+          const Icon = n.icon;
+          const isActive = active === n.id;
+          return (
+            <button key={n.id} onClick={() => navigate(n.id)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "none", cursor: "pointer", marginBottom: 3, textAlign: "left", backgroundColor: isActive ? DS.sage : "transparent", color: isActive ? DS.deepForest : DS.sageLight }}>
+              <Icon size={14} />
+              <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, lineHeight: 1.3 }}>{n.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+      <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <p style={{ fontSize: 11, color: DS.sageLight, margin: "0 0 2px" }}>Version 1.0 · April 2026</p>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", margin: 0 }}>CONFIDENTIAL</p>
+      </div>
+    </>
+  );
+
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "'Inter', system-ui, sans-serif", backgroundColor: DS.lightGrey }}>
 
-      {/* ── SIDEBAR ── */}
-      <aside style={{ width: 248, backgroundColor: DS.deepForest, display: "flex", flexDirection: "column", flexShrink: 0, overflow: "hidden" }}>
-        <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          <button onClick={() => setActive("landing")} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 14 }}>
-            <Home size={12} color={DS.sageLight} />
-            <span style={{ fontSize: 11, color: DS.sageLight, fontWeight: 600, letterSpacing: "0.05em" }}>Back to overview</span>
+      {/* ── DESKTOP SIDEBAR (≥1024px) ── */}
+      {!isMobile && (
+        <aside style={{ width: 248, backgroundColor: DS.deepForest, display: "flex", flexDirection: "column", flexShrink: 0, overflow: "hidden" }}>
+          <SidebarContent />
+        </aside>
+      )}
+
+      {/* ── MOBILE DRAWER OVERLAY (<1024px) ── */}
+      {isMobile && drawerOpen && (
+        <div
+          onClick={() => setDrawerOpen(false)}
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 40, backdropFilter: "blur(2px)" }}
+        />
+      )}
+      {isMobile && (
+        <aside style={{
+          position: "fixed", top: 0, left: 0, bottom: 0,
+          width: 272,
+          backgroundColor: DS.deepForest,
+          display: "flex", flexDirection: "column",
+          zIndex: 50,
+          transform: drawerOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
+          boxShadow: drawerOpen ? "4px 0 32px rgba(0,0,0,0.35)" : "none",
+        }}>
+          {/* Close button inside drawer */}
+          <button
+            onClick={() => setDrawerOpen(false)}
+            style={{ position: "absolute", top: 16, right: 14, background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 6, color: DS.sageLight }}
+            aria-label="Close menu"
+          >
+            <X size={18} />
           </button>
-          <p style={{ fontSize: 15, fontWeight: 800, color: DS.white, margin: "0 0 2px", lineHeight: 1.3 }}>IT, Data & AI Audit</p>
-          <p style={{ fontSize: 12, color: DS.sageLight, margin: 0 }}>Groupement EHPAD</p>
-        </div>
-        <nav style={{ flex: 1, overflowY: "auto", padding: "12px 10px" }}>
-          {NAV.map(n => {
-            const Icon = n.icon;
-            const isActive = active === n.id;
-            return (
-              <button key={n.id} onClick={() => setActive(n.id)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "none", cursor: "pointer", marginBottom: 3, textAlign: "left", backgroundColor: isActive ? DS.sage : "transparent", color: isActive ? DS.deepForest : DS.sageLight }}>
-                <Icon size={14} />
-                <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, lineHeight: 1.3 }}>{n.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-        <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-          <p style={{ fontSize: 11, color: DS.sageLight, margin: "0 0 2px" }}>Version 1.0 · April 2026</p>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", margin: 0 }}>CONFIDENTIAL</p>
-        </div>
-      </aside>
+          <SidebarContent />
+        </aside>
+      )}
 
       {/* ── CONTENT ── */}
-      <main style={{ flex: 1, overflowY: "auto" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "44px 44px 100px" }}>
+      <main style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+
+        {/* Mobile top bar */}
+        {isMobile && (
+          <div style={{ position: "sticky", top: 0, zIndex: 30, backgroundColor: DS.deepForest, display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+            <button
+              onClick={() => setDrawerOpen(true)}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: DS.white, display: "flex", alignItems: "center" }}
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: DS.white, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {NAV.find(n => n.id === active)?.label ?? ""}
+              </p>
+            </div>
+            <button onClick={() => navigate("landing")} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", gap: 5, color: DS.sageLight }}>
+              <Home size={14} />
+            </button>
+          </div>
+        )}
+
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: isMobile ? "24px 16px 100px" : "44px 44px 100px", width: "100%" }}>
           {renderSection()}
+
+          {/* ── PREV / NEXT NAVIGATION ── */}
+          <div style={{ display: "flex", gap: 12, marginTop: 48, paddingTop: 24, borderTop: `1px solid ${DS.border}` }}>
+            {prevSection ? (
+              <button
+                onClick={() => navigate(prevSection.id)}
+                style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderRadius: 10, border: `1.5px solid ${DS.border}`, backgroundColor: DS.white, cursor: "pointer", textAlign: "left" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = DS.sage; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = DS.border; }}
+              >
+                <ChevronRight size={16} color={DS.sage} style={{ transform: "rotate(180deg)", flexShrink: 0 }} />
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 11, color: DS.sageLight, margin: "0 0 2px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Previous</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{prevSection.label}</p>
+                </div>
+              </button>
+            ) : <div style={{ flex: 1 }} />}
+
+            {nextSection ? (
+              <button
+                onClick={() => navigate(nextSection.id)}
+                style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, padding: "14px 18px", borderRadius: 10, border: `1.5px solid ${DS.border}`, backgroundColor: DS.white, cursor: "pointer", textAlign: "right" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = DS.sage; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = DS.border; }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 11, color: DS.sageLight, margin: "0 0 2px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Next</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nextSection.label}</p>
+                </div>
+                <ChevronRight size={16} color={DS.sage} style={{ flexShrink: 0 }} />
+              </button>
+            ) : <div style={{ flex: 1 }} />}
+          </div>
         </div>
       </main>
     </div>
