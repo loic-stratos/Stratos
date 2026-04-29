@@ -21,6 +21,14 @@ const DS = {
   border: "#E5E7EB",
 };
 
+// ─── GRID HELPERS ────────────────────────────────────────────────────────────
+const g = {
+  col2: (m: boolean) => ({ display: "grid" as const, gridTemplateColumns: m ? "1fr" : "1fr 1fr" }),
+  col3: (m: boolean) => ({ display: "grid" as const, gridTemplateColumns: m ? "1fr" : "1fr 1fr 1fr" }),
+  col4: (m: boolean) => ({ display: "grid" as const, gridTemplateColumns: m ? "1fr 1fr" : "repeat(4, 1fr)" }),
+  col5: (m: boolean) => ({ display: "grid" as const, gridTemplateColumns: m ? "1fr 1fr" : "repeat(5, 1fr)" }),
+};
+
 // ─── NAV ────────────────────────────────────────────────────────────────────
 const NAV = [
   { id: "intro",          label: "01 · Introduction",        icon: FileText   },
@@ -282,7 +290,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 const h1Style: React.CSSProperties = {
-  fontSize: 28,
+  fontSize: 30,
   fontWeight: 800,
   color: DS.deepForest,
   margin: "4px 0 0",
@@ -297,16 +305,16 @@ const bodyText: React.CSSProperties = {
 };
 
 // ─── SECTION 01 — INTRODUCTION ──────────────────────────────────────────────
-const IntroSection = () => (
+const IntroSection = ({ isMobile = false }: { isMobile?: boolean }) => (
   <div>
-    <div style={{ marginBottom: 32 }}>
+    <div style={{ marginBottom: 32, paddingTop: isMobile ? 8 : 0 }}>
       <span style={labelStyle}>Section 01</span>
       <h1 style={h1Style}>Introduction</h1>
     </div>
 
-    {/* Context + Pillars */}
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-      <div style={card}>
+    {/* Context + Pillars — stretch so both cards are same height */}
+    <div style={{ ...g.col2(isMobile), gap: 16, marginBottom: 16, alignItems: "stretch" }}>
+      <div style={{ ...card, marginBottom: 0 }}>
         <span style={labelStyle}>Context & Objectives</span>
         <p style={bodyText}>
           The Groupement EHPAD engaged an independent audit of its IT ecosystem to support its digital
@@ -324,7 +332,7 @@ const IntroSection = () => (
           Process & Governance.
         </p>
       </div>
-      <div style={card}>
+      <div style={{ ...card, marginBottom: 0 }}>
         <span style={labelStyle}>The 4 Audit Pillars</span>
         {[
           { n: "01", t: "Application Ecosystem", d: "Full audit of tools, usage patterns, costs, and functional coverage across all business domains" },
@@ -346,7 +354,7 @@ const IntroSection = () => (
     {/* Scope */}
     <div style={card}>
       <span style={labelStyle}>Audit Scope</span>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
+      <div style={{ ...g.col5(isMobile), gap: 10 }}>
         {[
           { label: "Geography",    value: "France",          sub: "120 residences in scope" },
           { label: "Teams",        value: "6 departments",   sub: "IT · Finance · Ops · HR · Commercial · Quality" },
@@ -366,7 +374,7 @@ const IntroSection = () => (
     {/* Methodology */}
     <div style={card}>
       <span style={labelStyle}>Methodology</span>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+      <div style={{ ...g.col3(isMobile), gap: 12 }}>
         {[
           { phase: "Phase 01", title: "Document Review",       desc: "Application cartographies, vendor contracts, security reports, management dashboards, ongoing project documentation, and financial reporting files." },
           { phase: "Phase 02", title: "Stakeholder Interviews", desc: "25 individual interviews conducted with key stakeholders: CIO, CFO, CEO, Regional Directors, EHPAD residence directors, commercial, HR, care, and compliance teams." },
@@ -381,26 +389,36 @@ const IntroSection = () => (
       </div>
     </div>
 
-    {/* Interviewees */}
+    {/* Interviewees — grouped by scope */}
     <div style={card}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <span style={{ ...labelStyle, marginBottom: 0 }}>Stakeholders Interviewed</span>
         <span style={{ fontSize: 12, fontWeight: 600, color: DS.sage, backgroundColor: DS.lightGrey, borderRadius: 20, padding: "4px 12px" }}>25 interviews</span>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-        {INTERVIEWEES.map((p, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 12px", borderRadius: 7, backgroundColor: DS.lightGrey }}>
-            <span style={{ fontSize: 13, color: DS.deepForest, fontWeight: 500 }}>{p.role}</span>
-            <span style={{ fontSize: 11, color: DS.sage, fontWeight: 700, letterSpacing: "0.05em" }}>{p.scope}</span>
+      {(["Group", "France"] as const).map(scope => {
+        const people = INTERVIEWEES.filter(p => p.scope === scope);
+        return (
+          <div key={scope} style={{ marginBottom: scope === "Group" ? 16 : 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: DS.white, backgroundColor: scope === "Group" ? DS.deepForest : DS.forestMed, borderRadius: 20, padding: "2px 10px", letterSpacing: "0.06em", textTransform: "uppercase" }}>{scope}</span>
+              <span style={{ fontSize: 11, color: DS.sageLight }}>{people.length} interviewees</span>
+            </div>
+            <div style={{ ...g.col2(isMobile), gap: 5 }}>
+              {people.map((p, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: 7, backgroundColor: scope === "Group" ? `${DS.deepForest}08` : DS.lightGrey, border: `1px solid ${scope === "Group" ? DS.deepForest + "14" : DS.border}` }}>
+                  <span style={{ fontSize: 13, color: DS.deepForest, fontWeight: 500 }}>{p.role}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   </div>
 );
 
 // ─── SECTION 02 — EXECUTIVE SUMMARY ─────────────────────────────────────────
-const ExecutiveSection = () => {
+const ExecutiveSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [openId, setOpenId] = useState<string | null>(null);
   const toggle = (id: string) => setOpenId(openId === id ? null : id);
 
@@ -412,12 +430,12 @@ const ExecutiveSection = () => {
       </div>
 
       {/* Maturity banner */}
-      <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 28, marginBottom: 28 }}>
+      <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 24, marginBottom: 16 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px" }}>IT Maturity Assessment — France</p>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", lineHeight: 1.75, margin: "0 0 20px" }}>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 20px" }}>
           France concentrates the most significant challenges identified in this audit. The application ecosystem is highly fragmented, shadow IT is present at multiple layers of the stack, and the absence of governance translates into a deep organizational dysfunction in how IT tools are selected, deployed, and sustained over time.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ ...g.col2(isMobile), gap: 12 }}>
           {[
             { label: "DIGITAL MATURITY",  verdict: "Fragile", detail: "Undocumented ESB • pervasive shadow IT • ageing LAN network • single developer dependency on data flows", color: DS.darkRed, bg: DS.redBg },
             { label: "FINANCIAL MATURITY", verdict: "Low",     detail: "No monthly financial close • structural accounting backlog • Excel-driven group consolidation by a single person", color: DS.darkRed, bg: DS.redBg },
@@ -432,16 +450,16 @@ const ExecutiveSection = () => {
       </div>
 
       {/* KPI strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 28 }}>
+      <div style={{ ...g.col4(isMobile), gap: 10, marginBottom: 16 }}>
         {[
           { value: "400K€+", label: "IT investments with no measured return", color: DS.darkRed, bg: DS.redBg },
           { value: "4–5 FTE", label: "Mobilized on manual bank reconciliation", color: DS.saddleBrown, bg: DS.amberBg },
           { value: "20%",    label: "Residences compliant with ARS deadline", color: DS.darkRed, bg: DS.redBg },
-          { value: "5–10 FTE", label: "Recoverable through quick-win automation", color: DS.forestMed, bg: "#E6F2EC" },
+          { value: "5–10 FTE", label: "Recoverable through quick-win automation", color: DS.forestMed, bg: DS.lightGrey },
         ].map(k => (
           <div key={k.label} style={{ backgroundColor: k.bg, borderRadius: 10, padding: 16, textAlign: "center" }}>
-            <p style={{ fontSize: 26, fontWeight: 800, color: k.color, margin: "0 0 6px" }}>{k.value}</p>
-            <p style={{ fontSize: 11, color: DS.textGrey, margin: 0, lineHeight: 1.4 }}>{k.label}</p>
+            <p style={{ fontSize: 28, fontWeight: 800, color: k.color, margin: "0 0 6px" }}>{k.value}</p>
+            <p style={{ fontSize: 12, color: DS.textGrey, margin: 0, lineHeight: 1.4 }}>{k.label}</p>
           </div>
         ))}
       </div>
@@ -457,19 +475,19 @@ const ExecutiveSection = () => {
           const textColor   = isOrange ? DS.saddleBrown : DS.darkRed;
 
           return (
-            <div key={h.id} style={{ borderRadius: 10, border: `1.5px solid ${isOpen ? borderColor : DS.border}`, overflow: "hidden", backgroundColor: DS.white }}>
+            <div key={h.id} style={{ borderRadius: 10, border: `1.5px solid ${isOpen ? borderColor : DS.border}`, overflow: "hidden", backgroundColor: DS.white, transition: "border-color 0.15s" }}>
               <button
                 onClick={() => toggle(h.id)}
-                style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "15px 20px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                style={{ width: "100%", display: "flex", alignItems: "flex-start", gap: 12, padding: "15px 20px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
               >
-                <span style={{ fontSize: 11, fontWeight: 800, color: DS.sageLight, width: 22, flexShrink: 0 }}>{h.id}</span>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: isOrange ? DS.amber : DS.darkRed, flexShrink: 0 }} />
-                <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: DS.deepForest }}>{h.title}</span>
-                <span style={{ color: DS.sageLight, flexShrink: 0 }}>{isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: DS.textGrey, width: 22, flexShrink: 0, paddingTop: 2 }}>{h.id}</span>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: isOrange ? DS.amber : DS.darkRed, flexShrink: 0, marginTop: 4 }} />
+                <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: DS.deepForest, lineHeight: 1.4 }}>{h.title}</span>
+                <span style={{ color: DS.textGrey, flexShrink: 0, paddingTop: 1 }}>{isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>
               </button>
               {isOpen && (
-                <div style={{ padding: "0 20px 20px", backgroundColor: bgColor }}>
-                  <p style={{ fontSize: 14, color: DS.deepForest, lineHeight: 1.8, margin: "14px 0 14px" }}>{h.content}</p>
+                <div style={{ padding: "0 20px 20px 20px", backgroundColor: bgColor, borderTop: `1px solid ${borderColor}33` }}>
+                  <p style={{ fontSize: 14, color: DS.deepForest, lineHeight: 1.8, margin: "16px 0 14px" }}>{h.content}</p>
                   <div style={{ backgroundColor: DS.white, borderRadius: 8, padding: "14px 16px", border: `1px solid ${borderColor}33` }}>
                     <p style={{ fontSize: 11, fontWeight: 700, color: textColor, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Business Impact</p>
                     <p style={{ fontSize: 13, color: DS.deepForest, lineHeight: 1.65, margin: 0 }}>{h.impact}</p>
@@ -615,10 +633,10 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
       {/* ── Current Architecture ── */}
       {subTab === "architecture" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 28 }}>
-            <p style={{ ...labelStyle, marginBottom: 20 }}>Current Data Flow — ESB Architecture</p>
+          <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24 }}>
+            <p style={{ ...labelStyle, marginBottom: 16 }}>Current Data Flow — ESB Architecture</p>
             {/* Visual ESB diagram */}
-            <div style={{ backgroundColor: DS.lightGrey, borderRadius: 12, padding: 28 }}>
+            <div style={{ backgroundColor: DS.lightGrey, borderRadius: 12, padding: 24 }}>
               {/* Sources row */}
               <div style={{ display: "flex", justifyContent: "center", gap: 10, marginBottom: 16 }}>
                 {ESB_SOURCES.map(s => (
@@ -650,7 +668,7 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
             </div>
           </div>
           {/* Risk callouts */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ ...g.col2(isMobile), gap: 12 }}>
             {[
               { label: "Single point of failure", detail: "The entire group data pipeline relies on one developer with no backup, no documentation, and no high-availability setup. Any absence creates a full reporting blackout.", sev: "red" as const },
               { label: "No real-time monitoring", detail: "No alerting system exists on data flow failures. A broken sync between Agesoft and the DataHub can go unnoticed for days before being detected manually.", sev: "red" as const },
@@ -683,12 +701,12 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
                   <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: isRed ? DS.darkRed : DS.amber }} />
                   <p style={{ fontSize: 14, fontWeight: 700, color: isRed ? DS.darkRed : DS.saddleBrown, margin: 0 }}>{g.ref}</p>
                 </div>
-                <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
                   <div>
                     <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Finding</p>
                     <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{g.detail}</p>
                   </div>
-                  <div style={{ borderLeft: `1px solid ${DS.border}`, paddingLeft: 16 }}>
+                  <div style={{ borderLeft: isMobile ? "none" : `1px solid ${DS.border}`, borderTop: isMobile ? `1px solid ${DS.border}` : "none", paddingLeft: isMobile ? 0 : 16, paddingTop: isMobile ? 16 : 0 }}>
                     <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>Business Impact</p>
                     <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{g.impact}</p>
                   </div>
@@ -713,7 +731,7 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
                 {i < 2 && <span style={{ marginLeft: "auto", fontSize: 20, color: layer.color }}>→</span>}
               </div>
               <div style={{ padding: "14px 20px" }}>
-                <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 6 }}>
                   {layer.items.map((item, j) => (
                     <li key={j} style={{ display: "flex", gap: 8, fontSize: 13, color: DS.textGrey, lineHeight: 1.5 }}>
                       <span style={{ color: DS.sage, flexShrink: 0 }}>·</span>{item}
@@ -736,7 +754,7 @@ const DataSection = ({ isMobile = false }: { isMobile?: boolean }) => {
 };
 
 // ─── SECTION 06 — AI ─────────────────────────────────────────────────────────
-const AISection = () => {
+const AISection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
@@ -747,7 +765,7 @@ const AISection = () => {
       </div>
 
       {/* Guiding principle */}
-      <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 24, marginBottom: 20 }}>
+      <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 24, marginBottom: 16 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px" }}>Guiding Principle</p>
         <p style={{ fontSize: 14, color: DS.white, lineHeight: 1.8, margin: 0 }}>
           The Group must not wait for a perfect data system before launching its first AI use cases. The right approach is to start from available data, begin small, validate before scaling, and systematically measure ROI. <strong style={{ color: DS.sage }}>AI governance must be established before any deployment.</strong>
@@ -755,7 +773,7 @@ const AISection = () => {
       </div>
 
       {/* Governance */}
-      <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24, marginBottom: 20 }}>
+      <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24, marginBottom: 16 }}>
         <p style={labelStyle}>AI Governance — Prerequisites</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {[
@@ -774,7 +792,7 @@ const AISection = () => {
       </div>
 
       {/* Priority use cases */}
-      <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24, marginBottom: 20 }}>
+      <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24, marginBottom: 16 }}>
         <p style={labelStyle}>Priority Use Cases — Click for details</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {AI_PRIORITY.map((uc, i) => {
@@ -782,10 +800,10 @@ const AISection = () => {
             const isP1 = uc.horizon === "P1";
             return (
               <div key={i} style={{ borderRadius: 10, border: `1.5px solid ${isOpen ? DS.forestMed : DS.border}`, overflow: "hidden" }}>
-                <button onClick={() => setSelected(isOpen ? null : i)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                <button onClick={() => setSelected(isOpen ? null : i)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", background: "none", border: "none", cursor: "pointer", textAlign: "left", flexWrap: "wrap" }}>
                   <span style={{ fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 20, backgroundColor: isP1 ? DS.redBg : DS.amberBg, color: isP1 ? DS.darkRed : DS.saddleBrown, flexShrink: 0 }}>{uc.horizon}</span>
-                  <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: DS.deepForest }}>{uc.title}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: DS.forestMed, backgroundColor: "#E6F2EC", borderRadius: 20, padding: "3px 10px", flexShrink: 0 }}>{uc.roi}</span>
+                  <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: DS.deepForest, minWidth: 120 }}>{uc.title}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: DS.forestMed, backgroundColor: DS.lightGrey, borderRadius: 20, padding: "3px 10px", flexShrink: 0 }}>{uc.roi}</span>
                   <span style={{ color: DS.sageLight, flexShrink: 0 }}>{isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>
                 </button>
                 {isOpen && (
@@ -802,7 +820,7 @@ const AISection = () => {
       {/* Long-term use cases */}
       <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24 }}>
         <p style={labelStyle}>Long-Term Use Cases (P3 Horizon)</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ ...g.col2(isMobile), gap: 10 }}>
           {AI_LONGTERM.map((uc, i) => (
             <div key={i} style={{ backgroundColor: DS.lightGrey, borderRadius: 8, padding: 16 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest, margin: "0 0 6px" }}>{uc.title}</p>
@@ -818,7 +836,7 @@ const AISection = () => {
 // ─── PROCESS SECTION DATA ────────────────────────────────────────────────────
 type ProcStatus = "ok" | "partial" | "ko";
 const PROC_STATUS: Record<ProcStatus, { label: string; dot: string; color: string; bg: string }> = {
-  ok:      { label: "Operational", dot: "#22C55E", color: "#166534", bg: "#DCFCE7" },
+  ok:      { label: "Operational", dot: "#22C55E", color: DS.forestMed, bg: DS.lightGrey },
   partial: { label: "Partial",     dot: DS.amber,  color: DS.saddleBrown, bg: DS.amberBg },
   ko:      { label: "Broken",      dot: DS.darkRed, color: DS.darkRed, bg: DS.redBg },
 };
@@ -827,7 +845,7 @@ const ProcChip = ({ s }: { s: ProcStatus }) => {
   return <span style={{ fontSize: 11, fontWeight: 600, color: c.color, backgroundColor: c.bg, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>{c.label}</span>;
 };
 const RecTag = ({ type }: { type: "QUICK WIN" | "LONG TERM" }) => (
-  <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, backgroundColor: type === "QUICK WIN" ? "#DCFCE7" : "#DBEAFE", color: type === "QUICK WIN" ? "#166534" : "#1E40AF", flexShrink: 0, whiteSpace: "nowrap" }}>{type}</span>
+  <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, backgroundColor: type === "QUICK WIN" ? DS.lightGrey : DS.lightGrey, color: type === "QUICK WIN" ? DS.forestMed : DS.forestMed, flexShrink: 0, whiteSpace: "nowrap" }}>{type}</span>
 );
 
 // ── COMMERCIAL DATA ───────────────────────────────────────────────────────────
@@ -1162,6 +1180,54 @@ const HR_TRAINING = {
   ],
 };
 
+// ─── OVERVIEW TABLE (responsive) ─────────────────────────────────────────────
+interface OverviewRow { process: string; status: ProcStatus; tools: string; issue: string; }
+const OverviewTable = ({ rows, title, isMobile }: { rows: OverviewRow[]; title: string; isMobile: boolean }) => (
+  <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
+    <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
+      <p style={{ fontSize: 12, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>{title}</p>
+    </div>
+
+    {/* ── DESKTOP: table ── */}
+    {!isMobile && (
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ backgroundColor: DS.lightGrey }}>
+            {["Process", "Status", "Tools", "Key Issue"].map(h => (
+              <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} style={{ borderTop: `1px solid ${DS.border}` }}>
+              <td style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: DS.deepForest }}>{r.process}</td>
+              <td style={{ padding: "11px 16px" }}><ProcChip s={r.status} /></td>
+              <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.tools}</td>
+              <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.issue}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+
+    {/* ── MOBILE: cards ── */}
+    {isMobile && (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {rows.map((r, i) => (
+          <div key={i} style={{ padding: "14px 16px", borderTop: i > 0 ? `1px solid ${DS.border}` : "none" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: DS.deepForest, margin: 0, flex: 1 }}>{r.process}</p>
+              <ProcChip s={r.status} />
+            </div>
+            <p style={{ fontSize: 12, color: DS.textGrey, margin: 0, lineHeight: 1.6 }}>{r.issue}</p>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 // ─── SECTION 05 — PROCESSES ───────────────────────────────────────────────────
 const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [domain, setDomain] = useState<"commercial" | "finance" | "ehpad" | "rh">("commercial");
@@ -1188,7 +1254,7 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24 }}>
         <p style={{ fontSize: 18, fontWeight: 800, color: DS.deepForest, margin: "0 0 4px" }}>{data.title}</p>
-        <p style={{ fontSize: 13, color: DS.sageLight, margin: "0 0 16px" }}>{data.subtitle}</p>
+        <p style={{ fontSize: 13, color: DS.textGrey, margin: "0 0 16px" }}>{data.subtitle}</p>
         <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.75, margin: 0, padding: "14px 16px", backgroundColor: DS.lightGrey, borderRadius: 8 }}>{data.context}</p>
       </div>
       <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24 }}>
@@ -1232,30 +1298,7 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
           <SubTabBar tabs={COMM_TABS} active={commTab} onChange={setCommTab} isMobile={isMobile} />
 
           {commTab === "overview" && (
-            <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
-              <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>Commercial processes — status overview</p>
-              </div>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: DS.lightGrey }}>
-                    {["Process", "Status", "Tools", "Key Issue"].map(h => (
-                      <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {COMMERCIAL_OVERVIEW.map((r, i) => (
-                    <tr key={i} style={{ borderTop: `1px solid ${DS.border}` }}>
-                      <td style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: DS.deepForest }}>{r.process}</td>
-                      <td style={{ padding: "11px 16px" }}><ProcChip s={r.status} /></td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.tools}</td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.issue}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <OverviewTable rows={COMMERCIAL_OVERVIEW} title="Commercial processes — status overview" isMobile={isMobile} />
           )}
           {commTab === "fieldsales"  && renderSubProcess(FIELD_SALES)}
           {commTab === "marches"     && renderSubProcess(MARCHES_PUBLICS)}
@@ -1279,30 +1322,7 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
             isMobile={isMobile}
           />
           {finTab === "overview" && (
-            <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
-              <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>Finance processes — status overview</p>
-              </div>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: DS.lightGrey }}>
-                    {["Process", "Status", "Tools", "Key Issue"].map(h => (
-                      <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {FINANCE_OVERVIEW.map((r, i) => (
-                    <tr key={i} style={{ borderTop: `1px solid ${DS.border}` }}>
-                      <td style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: DS.deepForest }}>{r.process}</td>
-                      <td style={{ padding: "11px 16px" }}><ProcChip s={r.status} /></td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.tools}</td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.issue}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <OverviewTable rows={FINANCE_OVERVIEW} title="Finance processes — status overview" isMobile={isMobile} />
           )}
           {finTab === "achats"      && renderSubProcess(FINANCE_ACHATS)}
           {finTab === "facturation" && renderSubProcess(FINANCE_FACTURATION)}
@@ -1327,30 +1347,7 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
             isMobile={isMobile}
           />
           {ehpadTab === "overview" && (
-            <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
-              <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>EHPAD Operations — status overview</p>
-              </div>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: DS.lightGrey }}>
-                    {["Process", "Status", "Tools", "Key Issue"].map(h => (
-                      <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {EHPAD_OVERVIEW.map((r, i) => (
-                    <tr key={i} style={{ borderTop: `1px solid ${DS.border}` }}>
-                      <td style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: DS.deepForest }}>{r.process}</td>
-                      <td style={{ padding: "11px 16px" }}><ProcChip s={r.status} /></td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.tools}</td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.issue}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <OverviewTable rows={EHPAD_OVERVIEW} title="EHPAD Operations — status overview" isMobile={isMobile} />
           )}
           {ehpadTab === "admission" && renderSubProcess(EHPAD_ADMISSION)}
           {ehpadTab === "dispo"     && renderSubProcess(EHPAD_DISPO)}
@@ -1375,30 +1372,7 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
             isMobile={isMobile}
           />
           {hrTab === "overview" && (
-            <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
-              <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>HR processes — status overview</p>
-              </div>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: DS.lightGrey }}>
-                    {["Process", "Status", "Tools", "Key Issue"].map(h => (
-                      <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {HR_OVERVIEW.map((r, i) => (
-                    <tr key={i} style={{ borderTop: `1px solid ${DS.border}` }}>
-                      <td style={{ padding: "11px 16px", fontSize: 13, fontWeight: 600, color: DS.deepForest }}>{r.process}</td>
-                      <td style={{ padding: "11px 16px" }}><ProcChip s={r.status} /></td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.tools}</td>
-                      <td style={{ padding: "11px 16px", fontSize: 12, color: DS.textGrey }}>{r.issue}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <OverviewTable rows={HR_OVERVIEW} title="HR processes — status overview" isMobile={isMobile} />
           )}
           {hrTab === "recruitment" && renderSubProcess(HR_RECRUITMENT)}
           {hrTab === "onboarding"  && renderSubProcess(HR_ONBOARDING)}
@@ -1415,9 +1389,9 @@ type Phase = "P1" | "P2" | "P3";
 interface GanttItem { id: string; ws: 1|2|3|4; label: string; start: number; end: number; phase: Phase; detail: string; tools: string; }
 
 const PHASE_COLORS: Record<Phase, { bg: string; text: string; border: string }> = {
-  P1: { bg: "#166534", text: DS.white,       border: "#14532D" },
+  P1: { bg: DS.forestMed, text: DS.white,       border: DS.forestMed },
   P2: { bg: DS.saddleBrown, text: DS.white,  border: "#7C2D12" },
-  P3: { bg: "#1E40AF", text: DS.white,       border: "#1E3A8A" },
+  P3: { bg: DS.forestMed, text: DS.white,       border: DS.deepForest },
 };
 
 const WS_LABELS: Record<number, string> = {
@@ -1471,9 +1445,9 @@ const GANTT_ITEMS: GanttItem[] = [
 ];
 
 const BUSINESS_OBJECTIVES = [
-  { id:"OB1", label:"5–10 FTE recovered through automation",      detail:"Bank reconciliation (~3 FTE), ARS declarations (~1 FTE), manual CRM entry (~1–2 FTE), payroll transfers (~1–2 FTE). Equivalent to 300–600K€/yr in redeployable capacity.",    color: DS.forestMed, bg: "#E6F2EC" },
-  { id:"OB2", label:"Real-time occupancy dashboard live",         detail:"Group occupancy rate known in real time across all 120 residences — no manual Excel consolidation. Updated daily from the Agesoft/DataHub Bronze layer.",                      color: "#1D4ED8", bg: "#DBEAFE" },
-  { id:"OB3", label:"100% ARS declaration compliance",            detail:"Structural elimination of the current 80% late-submission rate through Agesoft-driven automation and centralized declaration tracking.",                                          color: "#166534", bg: "#DCFCE7" },
+  { id:"OB1", label:"5–10 FTE recovered through automation",      detail:"Bank reconciliation (~3 FTE), ARS declarations (~1 FTE), manual CRM entry (~1–2 FTE), payroll transfers (~1–2 FTE). Equivalent to 300–600K€/yr in redeployable capacity.",    color: DS.forestMed, bg: DS.lightGrey },
+  { id:"OB2", label:"Real-time occupancy dashboard live",         detail:"Group occupancy rate known in real time across all 120 residences — no manual Excel consolidation. Updated daily from the Agesoft/DataHub Bronze layer.",                      color: DS.forestMed, bg: DS.lightGrey },
+  { id:"OB3", label:"100% ARS declaration compliance",            detail:"Structural elimination of the current 80% late-submission rate through Agesoft-driven automation and centralized declaration tracking.",                                          color: DS.forestMed, bg: DS.lightGrey },
   { id:"OB4", label:"Monthly financial close at D+5",             detail:"Close timeline reduced from several weeks to D+5 through automated Kyriba/Sage reconciliation, formal close calendar, and Power BI dashboard eliminating manual consolidation.",   color: DS.saddleBrown, bg: DS.amberBg },
   { id:"OB5", label:"Zero critical cyber vulnerabilities",        detail:"MFA deployed group-wide, end-of-life switches replaced, VLAN architecture in place, professional emails for all staff, ESB documented and monitored — BCP validated.",             color: DS.darkRed, bg: DS.redBg },
 ];
@@ -1558,86 +1532,130 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {/* Legend + filter */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {(["all","P1","P2","P3"] as const).map(p => (
                 <button key={p} onClick={() => setPhaseFilter(p)} style={{ padding: "5px 14px", borderRadius: 20, border: `1.5px solid ${phaseFilter === p ? DS.deepForest : DS.border}`, cursor: "pointer", fontSize: 12, fontWeight: 600, backgroundColor: phaseFilter === p ? DS.deepForest : DS.white, color: phaseFilter === p ? DS.white : DS.textGrey }}>
                   {p === "all" ? "All phases" : p}
                 </button>
               ))}
             </div>
-            <div style={{ display: "flex", gap: 12 }}>
-              {(["P1","P2","P3"] as const).map(p => (
-                <div key={p} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: PHASE_COLORS[p].bg }} />
-                  <span style={{ fontSize: 12, color: DS.textGrey }}>{p} {p==="P1"?"M1–M6":p==="P2"?"M7–M12":"M13–M18"}</span>
-                </div>
-              ))}
-            </div>
+            {!isMobile && (
+              <div style={{ display: "flex", gap: 12 }}>
+                {(["P1","P2","P3"] as const).map(p => (
+                  <div key={p} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: PHASE_COLORS[p].bg }} />
+                    <span style={{ fontSize: 12, color: DS.textGrey }}>{p} {p==="P1"?"M1–M6":p==="P2"?"M7–M12":"M13–M18"}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Gantt grid */}
-          <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
-            {/* Month header */}
-            <div style={{ display: "grid", gridTemplateColumns: "160px repeat(18, 1fr)", backgroundColor: DS.deepForest }}>
-              <div style={{ padding: "8px 12px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>Workstream</div>
-              {MONTHS.map(m => (
-                <div key={m} style={{ padding: "8px 4px", fontSize: 11, fontWeight: 700, color: m<=6 ? "#86EFAC" : m<=12 ? "#FCD34D" : "#93C5FD", textAlign: "center", borderLeft: m===7||m===13 ? "2px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.07)" }}>
-                  M{m}
-                </div>
-              ))}
-            </div>
-            {/* WS rows */}
-            {WS_IDS.map(ws => {
-              const wsItems = filteredItems.filter(i => i.ws === ws);
-              return (
-                <div key={ws} style={{ borderTop: `1px solid ${DS.border}` }}>
-                  {/* WS label */}
-                  <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", padding: "6px 0", backgroundColor: DS.lightGrey }}>
-                    <div style={{ padding: "4px 12px", fontSize: 11, fontWeight: 700, color: DS.deepForest }}>{WS_LABELS[ws]}</div>
-                    {/* relative bar container */}
-                    <div style={{ position: "relative", height: wsItems.length > 0 ? wsItems.length * 28 + 8 : 28 }}>
-                      {wsItems.map((item, rowIdx) => {
-                        const left  = ((item.start - 1) / 18) * 100;
-                        const width = ((item.end - item.start + 1) / 18) * 100;
+          {/* ── MOBILE: card list ── */}
+          {isMobile ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {WS_IDS.map(ws => {
+                const wsItems = filteredItems.filter(i => i.ws === ws);
+                if (!wsItems.length) return null;
+                return (
+                  <div key={ws}>
+                    <div style={{ padding: "8px 12px", backgroundColor: DS.deepForest, borderRadius: "8px 8px 0 0" }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>{WS_LABELS[ws]}</p>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 0, border: `1px solid ${DS.border}`, borderTop: "none", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
+                      {wsItems.map((item, idx) => {
                         const pc = PHASE_COLORS[item.phase];
-                        const isSelected = selected?.id === item.id;
+                        const isOpen = selected?.id === item.id;
                         return (
-                          <button key={item.id} onClick={() => setSelected(isSelected ? null : item)}
-                            title={item.label}
-                            style={{ position: "absolute", top: rowIdx * 28 + 4, left: `${left}%`, width: `${width}%`, height: 22, borderRadius: 4, backgroundColor: pc.bg, border: `1.5px solid ${isSelected ? DS.white : pc.border}`, cursor: "pointer", padding: "0 6px", overflow: "hidden", boxShadow: isSelected ? "0 0 0 2px " + DS.sage : "none" }}>
-                            <span style={{ fontSize: 10, fontWeight: 700, color: pc.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>{item.label}</span>
-                          </button>
+                          <div key={item.id} style={{ borderTop: idx > 0 ? `1px solid ${DS.border}` : "none" }}>
+                            <button
+                              onClick={() => setSelected(isOpen ? null : item)}
+                              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: isOpen ? DS.lightGrey : DS.white, border: "none", cursor: "pointer", textAlign: "left" }}
+                            >
+                              <span style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: pc.bg, border: `1.5px solid ${pc.border}`, flexShrink: 0 }} />
+                              <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: DS.deepForest }}>{item.label}</span>
+                              <span style={{ fontSize: 11, color: DS.sageLight, flexShrink: 0 }}>M{item.start}→M{item.end}</span>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: pc.text, backgroundColor: pc.bg, borderRadius: 20, padding: "1px 8px", flexShrink: 0 }}>{item.phase}</span>
+                            </button>
+                            {isOpen && (
+                              <div style={{ padding: "12px 14px", backgroundColor: DS.deepForest }}>
+                                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", lineHeight: 1.7, margin: "0 0 8px" }}>{item.detail}</p>
+                                <p style={{ fontSize: 11, color: DS.sage, margin: 0 }}>Tools: {item.tools}</p>
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Detail panel */}
-          {selected && (
-            <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 24, display: "flex", gap: 20, alignItems: "flex-start" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, padding: "2px 10px", borderRadius: 20, backgroundColor: PHASE_COLORS[selected.phase].bg, color: PHASE_COLORS[selected.phase].text }}>{selected.phase}</span>
-                  <span style={{ fontSize: 11, color: DS.sageLight }}>{WS_LABELS[selected.ws]}</span>
-                  <span style={{ fontSize: 11, color: DS.sageLight }}>· M{selected.start} → M{selected.end}</span>
-                </div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: DS.white, margin: "0 0 10px" }}>{selected.label}</p>
-                <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: "0 0 10px" }}>{selected.detail}</p>
-                <p style={{ fontSize: 12, color: DS.sage, margin: 0 }}>Tools involved: {selected.tools}</p>
-              </div>
-              <button onClick={() => setSelected(null)} style={{ color: DS.sageLight, background: "none", border: "none", cursor: "pointer", fontSize: 20, lineHeight: 1, flexShrink: 0 }}>✕</button>
+                );
+              })}
             </div>
+          ) : (
+            <>
+              {/* ── DESKTOP: Gantt grid ── */}
+              <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
+                {/* Month header */}
+                <div style={{ display: "grid", gridTemplateColumns: "160px repeat(18, 1fr)", backgroundColor: DS.deepForest }}>
+                  <div style={{ padding: "8px 12px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>Workstream</div>
+                  {MONTHS.map(m => (
+                    <div key={m} style={{ padding: "8px 4px", fontSize: 11, fontWeight: 700, color: m<=6 ? DS.sage : m<=12 ? DS.amber : DS.sageLight, textAlign: "center", borderLeft: m===7||m===13 ? "2px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.07)" }}>
+                      M{m}
+                    </div>
+                  ))}
+                </div>
+                {/* WS rows */}
+                {WS_IDS.map(ws => {
+                  const wsItems = filteredItems.filter(i => i.ws === ws);
+                  return (
+                    <div key={ws} style={{ borderTop: `1px solid ${DS.border}` }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", padding: "6px 0", backgroundColor: DS.lightGrey }}>
+                        <div style={{ padding: "4px 12px", fontSize: 11, fontWeight: 700, color: DS.deepForest }}>{WS_LABELS[ws]}</div>
+                        <div style={{ position: "relative", height: wsItems.length > 0 ? wsItems.length * 28 + 8 : 28 }}>
+                          {wsItems.map((item, rowIdx) => {
+                            const left  = ((item.start - 1) / 18) * 100;
+                            const width = ((item.end - item.start + 1) / 18) * 100;
+                            const pc = PHASE_COLORS[item.phase];
+                            const isItemSelected = selected?.id === item.id;
+                            return (
+                              <button key={item.id} onClick={() => setSelected(isItemSelected ? null : item)}
+                                title={item.label}
+                                style={{ position: "absolute", top: rowIdx * 28 + 4, left: `${left}%`, width: `${width}%`, height: 22, borderRadius: 4, backgroundColor: pc.bg, border: `1.5px solid ${isItemSelected ? DS.white : pc.border}`, cursor: "pointer", padding: "0 6px", overflow: "hidden", boxShadow: isItemSelected ? "0 0 0 2px " + DS.sage : "none" }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: pc.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>{item.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Detail panel */}
+              {selected && (
+                <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 24, display: "flex", gap: 20, alignItems: "flex-start" }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, padding: "2px 10px", borderRadius: 20, backgroundColor: PHASE_COLORS[selected.phase].bg, color: PHASE_COLORS[selected.phase].text }}>{selected.phase}</span>
+                      <span style={{ fontSize: 11, color: DS.sageLight }}>{WS_LABELS[selected.ws]}</span>
+                      <span style={{ fontSize: 11, color: DS.sageLight }}>· M{selected.start} → M{selected.end}</span>
+                    </div>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: DS.white, margin: "0 0 10px" }}>{selected.label}</p>
+                    <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: "0 0 10px" }}>{selected.detail}</p>
+                    <p style={{ fontSize: 12, color: DS.sage, margin: 0 }}>Tools involved: {selected.tools}</p>
+                  </div>
+                  <button onClick={() => setSelected(null)} style={{ color: DS.sageLight, background: "none", border: "none", cursor: "pointer", fontSize: 20, lineHeight: 1, flexShrink: 0 }}>✕</button>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
 
       {/* ── WORKSTREAMS ── */}
       {subTab === "workstreams" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div style={{ ...g.col2(isMobile), gap: 16 }}>
           {WS_IDS.map(ws => {
             const d = WS_DETAIL[ws];
             return (
@@ -1648,7 +1666,7 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
                 <div style={{ padding: 18 }}>
                   {(["p1","p2","p3"] as const).map((p, pi) => (
                     <div key={p} style={{ marginBottom: pi < 2 ? 14 : 0 }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, color: ["#166534",DS.saddleBrown,"#1E40AF"][pi], textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>{p.toUpperCase()} — {["M1–M6","M7–M12","M13–M18"][pi]}</p>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: [DS.forestMed,DS.saddleBrown,DS.forestMed][pi], textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" }}>{p.toUpperCase()} — {["M1–M6","M7–M12","M13–M18"][pi]}</p>
                       <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 5 }}>
                         {d[p].map((a, i) => (
                           <li key={i} style={{ display: "flex", gap: 8, fontSize: 12, color: DS.textGrey, lineHeight: 1.5 }}>
@@ -1670,7 +1688,7 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {(["P1","P2","P3"] as const).map((ph, pi) => {
             const phItems = GANTT_ITEMS.filter(i => i.phase === ph);
-            const colors = [{ label:"#166534", bg:"#DCFCE7", border:"#86EFAC" }, { label:DS.saddleBrown, bg:DS.amberBg, border:"#FCD34D" }, { label:"#1E40AF", bg:"#DBEAFE", border:"#93C5FD" }][pi];
+            const colors = [{ label:DS.forestMed, bg:DS.lightGrey, border:DS.sage }, { label:DS.saddleBrown, bg:DS.amberBg, border:DS.amber }, { label:DS.forestMed, bg:DS.lightGrey, border:DS.sageLight }][pi];
             const ranges = ["Months 1–6","Months 7–12","Months 13–18"][pi];
             return (
               <div key={ph} style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
@@ -1709,7 +1727,7 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
 
 // ─── SECTION 03 — APPLICATION MAPPING ───────────────────────────────────────
 const STATUS_CFG: Record<ToolStatus, { dot: string; label: string; labelColor: string; labelBg: string }> = {
-  ok:      { dot: "#22C55E", label: "Operational",    labelColor: "#166534", labelBg: "#DCFCE7" },
+  ok:      { dot: "#22C55E", label: "Operational",    labelColor: DS.forestMed, labelBg: DS.lightGrey },
   partial: { dot: "#F59E0B", label: "Partial",        labelColor: DS.saddleBrown, labelBg: DS.amberBg },
   ko:      { dot: DS.darkRed, label: "Dysfunctional", labelColor: DS.darkRed, labelBg: DS.redBg },
 };
@@ -1752,10 +1770,10 @@ const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
       </div>
 
       {/* Summary KPIs */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 24 }}>
+      <div style={{ ...g.col4(isMobile), gap: 10, marginBottom: 24 }}>
         {[
           { value: total,        label: "Tools in scope",    color: DS.deepForest, bg: DS.lightGrey },
-          { value: totalOk,      label: "Operational",       color: "#166534",      bg: "#DCFCE7"    },
+          { value: totalOk,      label: "Operational",       color: DS.forestMed,      bg: DS.lightGrey    },
           { value: totalPartial, label: "Partial / Issues",  color: DS.saddleBrown, bg: DS.amberBg  },
           { value: totalKo,      label: "Dysfunctional",     color: DS.darkRed,     bg: DS.redBg    },
         ].map(k => (
@@ -1795,7 +1813,7 @@ const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
                         {t.opex !== "included" && t.opex !== "outsourced" && (
-                          <span style={{ fontSize: 11, color: DS.sageLight, fontWeight: 500 }}>{t.opex}/yr</span>
+                          <span style={{ fontSize: 11, color: DS.textGrey, fontWeight: 500 }}>{t.opex}/yr</span>
                         )}
                         <StatusChip status={t.status} />
                       </div>
@@ -1818,8 +1836,8 @@ const CartographieSection = ({ isMobile = false }: { isMobile?: boolean }) => {
               </button>
             ))}
           </div>
-          <p style={{ fontSize: 12, color: DS.sageLight, marginBottom: 16, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>{sw.category}</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: DS.textGrey, marginBottom: 16, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>{sw.category}</p>
+          <div style={{ ...g.col2(isMobile), gap: 12, marginBottom: 12 }}>
             {[
               { key: "forces",      label: "Strengths",      dot: "#22C55E", items: sw.forces      },
               { key: "faiblesses",  label: "Weaknesses",     dot: DS.darkRed,  items: sw.faiblesses },
@@ -1897,22 +1915,24 @@ const SECTION_CARDS = [
   { id: "transformation", icon: Target,     label: "07 · Transformation Plan", blurb: "26 actions across 4 workstreams — Gantt M1→M18"             },
 ];
 
-const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => (
-  <div style={{ display: "flex", height: "100vh", overflow: "hidden", backgroundColor: DS.deepForest }}>
+const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => {
+  const isMobile = useIsMobile();
+  return (
+  <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", minHeight: "100vh", backgroundColor: DS.deepForest, overflowY: isMobile ? "auto" : "hidden", height: isMobile ? "auto" : "100vh" }}>
     {/* Left panel */}
-    <div style={{ width: 420, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "52px 48px", borderRight: "1px solid rgba(255,255,255,0.07)" }}>
+    <div style={{ width: isMobile ? "100%" : 420, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: isMobile ? "40px 24px 32px" : "52px 48px", borderRight: isMobile ? "none" : "1px solid rgba(255,255,255,0.07)", borderBottom: isMobile ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
       {/* Header */}
       <div>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "rgba(147,183,163,0.12)", border: "1px solid rgba(147,183,163,0.25)", borderRadius: 20, padding: "6px 14px", marginBottom: 40 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "rgba(147,183,163,0.12)", border: "1px solid rgba(147,183,163,0.25)", borderRadius: 20, padding: "6px 14px", marginBottom: isMobile ? 24 : 40 }}>
           <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: DS.sage }} />
           <span style={{ fontSize: 11, fontWeight: 700, color: DS.sage, letterSpacing: "0.12em", textTransform: "uppercase" }}>Stratos · Confidential</span>
         </div>
         <p style={{ fontSize: 11, fontWeight: 700, color: DS.sageLight, textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 12px" }}>Audit Report · April 2026</p>
-        <h1 style={{ fontSize: 38, fontWeight: 900, color: DS.white, lineHeight: 1.15, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
+        <h1 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 900, color: DS.white, lineHeight: 1.15, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
           IT, Data<br />& AI Audit
         </h1>
-        <p style={{ fontSize: 18, fontWeight: 600, color: DS.sage, margin: "0 0 28px" }}>Groupement EHPAD · France</p>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.8, margin: "0 0 40px" }}>
+        <p style={{ fontSize: isMobile ? 15 : 18, fontWeight: 600, color: DS.sage, margin: "0 0 20px" }}>Groupement EHPAD · France</p>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.8, margin: "0 0 32px" }}>
           An independent assessment of the Group's application ecosystem, data infrastructure, business processes, and AI readiness — with a prioritized 18-month transformation roadmap.
         </p>
         <button
@@ -1924,19 +1944,21 @@ const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => (
         </button>
       </div>
       {/* Stratos footer */}
-      <div>
-        <div style={{ width: 32, height: 2, backgroundColor: DS.sage, marginBottom: 14, borderRadius: 2 }} />
-        <p style={{ fontSize: 13, fontWeight: 700, color: DS.white, margin: "0 0 4px" }}>Stratos</p>
-        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: 0, lineHeight: 1.6 }}>
-          Digital transformation advisory<br />for healthcare & social care operators
-        </p>
-      </div>
+      {!isMobile && (
+        <div>
+          <div style={{ width: 32, height: 2, backgroundColor: DS.sage, marginBottom: 14, borderRadius: 2 }} />
+          <p style={{ fontSize: 13, fontWeight: 700, color: DS.white, margin: "0 0 4px" }}>Stratos</p>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", margin: 0, lineHeight: 1.6 }}>
+            Digital transformation advisory<br />for healthcare & social care operators
+          </p>
+        </div>
+      )}
     </div>
 
     {/* Right panel — section cards */}
-    <div style={{ flex: 1, overflowY: "auto", padding: "52px 40px" }}>
+    <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? "28px 24px 40px" : "52px 40px" }}>
       <p style={{ fontSize: 11, fontWeight: 700, color: DS.sageLight, textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 24px" }}>7 Sections — click to navigate directly</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
         {SECTION_CARDS.map(s => {
           const Icon = s.icon;
           return (
@@ -1953,13 +1975,13 @@ const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => (
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 700, color: DS.sage, letterSpacing: "0.08em", textTransform: "uppercase" }}>{s.label}</span>
               </div>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", margin: 0, lineHeight: 1.55 }}>{s.blurb}</p>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", margin: 0, lineHeight: 1.55 }}>{s.blurb}</p>
             </button>
           );
         })}
       </div>
       {/* KPI strip at bottom */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginTop: 24 }}>
+      <div style={{ ...g.col4(isMobile), gap: 10, marginTop: 24 }}>
         {[
           { v: "120", l: "Residences" },
           { v: "25",  l: "Interviews" },
@@ -1974,7 +1996,8 @@ const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => (
       </div>
     </div>
   </div>
-);
+  );
+};
 
 // ─── RESPONSIVE HOOK ─────────────────────────────────────────────────────────
 function useIsMobile() {
@@ -2067,11 +2090,11 @@ export default function AuditReport() {
 
   const renderSection = () => {
     switch (active) {
-      case "intro":          return <IntroSection />;
-      case "executive":      return <ExecutiveSection />;
+      case "intro":          return <IntroSection isMobile={isMobile} />;
+      case "executive":      return <ExecutiveSection isMobile={isMobile} />;
       case "cartographie":   return <CartographieSection isMobile={isMobile} />;
       case "data":           return <DataSection isMobile={isMobile} />;
-      case "ia":             return <AISection />;
+      case "ia":             return <AISection isMobile={isMobile} />;
       case "processus":      return <ProcessSection isMobile={isMobile} />;
       case "transformation": return <TransformationSection isMobile={isMobile} />;
       default:               return <Placeholder label={NAV.find(n => n.id === active)?.label ?? ""} />;
@@ -2103,7 +2126,7 @@ export default function AuditReport() {
       </nav>
       <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <p style={{ fontSize: 11, color: DS.sageLight, margin: "0 0 2px" }}>Version 1.0 · April 2026</p>
-        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", margin: 0 }}>CONFIDENTIAL</p>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", margin: 0 }}>CONFIDENTIAL</p>
       </div>
     </>
   );
@@ -2172,7 +2195,7 @@ export default function AuditReport() {
           </div>
         )}
 
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: isMobile ? "24px 16px 100px" : "44px 44px 100px", width: "100%" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: isMobile ? "24px 16px 100px" : "44px 52px 100px", width: "100%" }}>
           {renderSection()}
 
           {/* ── PREV / NEXT NAVIGATION ── */}
