@@ -828,17 +828,16 @@ const AISection = ({ isMobile = false }: { isMobile?: boolean }) => {
 
 // ─── PROCESS SECTION DATA ────────────────────────────────────────────────────
 type ProcStatus = "ok" | "partial" | "ko";
-const PROC_STATUS: Record<ProcStatus, { label: string; dot: string; color: string; bg: string }> = {
-  ok:      { label: "Operational", dot: "#22C55E", color: DS.forestMed, bg: DS.lightGrey },
-  partial: { label: "Partial",     dot: DS.amber,  color: DS.saddleBrown, bg: DS.amberBg },
-  ko:      { label: "Broken",      dot: DS.darkRed, color: DS.darkRed, bg: DS.redBg },
+const PROC_STATUS: Record<ProcStatus, { dot: string }> = {
+  ok:      { dot: "#22C55E" },
+  partial: { dot: DS.amber  },
+  ko:      { dot: DS.darkRed },
 };
-const ProcChip = ({ s }: { s: ProcStatus }) => {
-  const c = PROC_STATUS[s];
-  return <span style={{ fontSize: 11, fontWeight: 600, color: c.color, backgroundColor: c.bg, borderRadius: 20, padding: "2px 8px", whiteSpace: "nowrap" }}>{c.label}</span>;
-};
+const ProcChip = ({ s }: { s: ProcStatus }) => (
+  <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", backgroundColor: PROC_STATUS[s].dot }} />
+);
 const RecTag = ({ type }: { type: "QUICK WIN" | "LONG TERM" }) => (
-  <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, backgroundColor: type === "QUICK WIN" ? DS.lightGrey : DS.lightGrey, color: type === "QUICK WIN" ? DS.forestMed : DS.forestMed, flexShrink: 0, whiteSpace: "nowrap" }}>{type}</span>
+  <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4, backgroundColor: type === "QUICK WIN" ? DS.deepForest : DS.lightGrey, color: type === "QUICK WIN" ? DS.white : DS.textGrey, flexShrink: 0, whiteSpace: "nowrap" }}>{type}</span>
 );
 
 // ── COMMERCIAL DATA ───────────────────────────────────────────────────────────
@@ -1177,8 +1176,16 @@ const HR_TRAINING = {
 interface OverviewRow { process: string; status: ProcStatus; tools: string; issue: string; }
 const OverviewTable = ({ rows, title, isMobile }: { rows: OverviewRow[]; title: string; isMobile: boolean }) => (
   <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
-    <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest }}>
+    <div style={{ padding: "14px 20px", backgroundColor: DS.deepForest, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
       <p style={{ fontSize: 12, fontWeight: 700, color: DS.sage, margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>{title}</p>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {([["#22C55E","Operational"],[DS.amber,"Partial"],[DS.darkRed,"Broken"]] as const).map(([dot, label]) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: dot, flexShrink: 0 }} />
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>{label}</span>
+          </div>
+        ))}
+      </div>
     </div>
 
     {/* ── DESKTOP: table ── */}
@@ -1230,10 +1237,10 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [hrTab,    setHrTab]    = useState<"overview" | "recruitment" | "onboarding" | "payroll" | "training">("overview");
 
   const DOMAINS = [
-    { id: "commercial" as const, label: "Commercial" },
-    { id: "finance"    as const, label: "Finance"    },
-    { id: "ehpad"      as const, label: "EHPAD Ops"  },
-    { id: "rh"         as const, label: "HR"         },
+    { id: "commercial" as const, label: "Commercial",  desc: "Field sales, public tenders and partner network" },
+    { id: "finance"    as const, label: "Finance",      desc: "Purchasing, billing, payroll and financial reporting" },
+    { id: "ehpad"      as const, label: "EHPAD Ops",    desc: "Admissions, room availability, staffing and quality" },
+    { id: "rh"         as const, label: "HR",           desc: "Recruitment, onboarding, payroll and training" },
   ];
 
   const COMM_TABS = [
@@ -1248,24 +1255,24 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
       <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24 }}>
         <p style={{ fontSize: 18, fontWeight: 800, color: DS.deepForest, margin: "0 0 4px" }}>{data.title}</p>
         <p style={{ fontSize: 13, color: DS.textGrey, margin: "0 0 16px" }}>{data.subtitle}</p>
-        <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.75, margin: 0, padding: "14px 16px", backgroundColor: DS.lightGrey, borderRadius: 8 }}>{data.context}</p>
+        <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.75, margin: 0 }}>{data.context}</p>
       </div>
       <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: DS.darkRed, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 14px" }}>Issues Identified</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: DS.textGrey, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 14px" }}>Issues Identified</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {data.dysfonctionnements.map((d, i) => (
-            <div key={i} style={{ display: "flex", gap: 12, padding: "12px 16px", backgroundColor: DS.redBg, borderRadius: 8, border: `1px solid ${DS.darkRed}22` }}>
-              <span style={{ color: DS.darkRed, flexShrink: 0, fontWeight: 700, fontSize: 13 }}>▸</span>
-              <p style={{ fontSize: 13, color: DS.deepForest, lineHeight: 1.7, margin: 0 }}>{d}</p>
+            <div key={i} style={{ display: "flex", gap: 12, padding: "11px 0", borderBottom: i < data.dysfonctionnements.length - 1 ? `1px solid ${DS.border}` : "none" }}>
+              <span style={{ color: DS.sage, flexShrink: 0, fontWeight: 700, fontSize: 13, paddingTop: 1 }}>›</span>
+              <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.7, margin: 0 }}>{d}</p>
             </div>
           ))}
         </div>
       </div>
       <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: DS.forestMed, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 14px" }}>Recommendations</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: DS.textGrey, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 14px" }}>Recommendations</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {data.recommandations.map((r, i) => (
-            <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "12px 16px", backgroundColor: DS.lightGrey, borderRadius: 8 }}>
+            <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "11px 0", borderBottom: i < data.recommandations.length - 1 ? `1px solid ${DS.border}` : "none" }}>
               <RecTag type={r.type} />
               <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{r.text}</p>
             </div>
@@ -1282,7 +1289,24 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
         <h1 style={h1Style}>Processes</h1>
       </div>
 
-      <SubTabBar tabs={DOMAINS} active={domain} onChange={setDomain} isMobile={isMobile} />
+      {/* Domain nav cards */}
+      <div style={{ ...g.col4(isMobile), gap: 10, marginBottom: 24 }}>
+        {DOMAINS.map(d => {
+          const isActive = domain === d.id;
+          return (
+            <button
+              key={d.id}
+              onClick={() => setDomain(d.id)}
+              style={{ textAlign: "left", padding: "16px 18px", borderRadius: 10, border: `1.5px solid ${isActive ? DS.deepForest : DS.border}`, backgroundColor: isActive ? DS.deepForest : DS.white, cursor: "pointer", transition: "all 0.15s" }}
+              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.borderColor = DS.sage; }}
+              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.borderColor = DS.border; }}
+            >
+              <p style={{ fontSize: 13, fontWeight: 700, color: isActive ? DS.white : DS.deepForest, margin: "0 0 4px" }}>{d.label}</p>
+              <p style={{ fontSize: 12, color: isActive ? DS.sage : DS.textGrey, margin: 0, lineHeight: 1.5 }}>{d.desc}</p>
+            </button>
+          );
+        })}
+      </div>
 
       {/* COMMERCIAL */}
       {domain === "commercial" && (
