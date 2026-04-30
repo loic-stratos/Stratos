@@ -1603,37 +1603,29 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
           ) : (
             <>
               {/* ── DESKTOP: Gantt grid ── */}
-              {/* WS legend */}
-              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 8 }}>
-                {WS_IDS.map(ws => (
-                  <div key={ws} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                    <span style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: WS_COLORS[ws].bar }} />
-                    <span style={{ fontSize: 12, color: DS.textGrey }}>{WS_LABELS[ws]}</span>
-                  </div>
-                ))}
-                <div style={{ marginLeft: "auto", display: "flex", gap: 12 }}>
+              {/* Phase legend */}
+              <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 8, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: 8 }}>
                   {(["P1","P2","P3"] as const).map(p => (
-                    <div key={p} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <span style={{ width: 12, height: 4, borderRadius: 2, backgroundColor: DS.textGrey, opacity: PHASE_OPACITY[p] }} />
-                      <span style={{ fontSize: 11, color: DS.textGrey }}>{p} {p==="P1"?"M1–M6":p==="P2"?"M7–M12":"M13–M18"}</span>
-                    </div>
+                    <span key={p} style={{ fontSize: 12, color: DS.textGrey }}>
+                      <span style={{ fontWeight: 700, color: DS.deepForest }}>{p}</span> {p==="P1"?"M1–M6":p==="P2"?"M7–M12":"M13–M18"}
+                    </span>
                   ))}
                 </div>
+                <span style={{ fontSize: 12, color: DS.textGrey, marginLeft: "auto" }}>Opacity indicates phase — P1 full, P3 subtle</span>
               </div>
 
               <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
                 {/* Month header */}
-                <div style={{ display: "grid", gridTemplateColumns: "160px repeat(18, 1fr)", backgroundColor: DS.deepForest }}>
-                  <div style={{ padding: "10px 12px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>Workstream</div>
+                <div style={{ display: "grid", gridTemplateColumns: "240px repeat(18, 1fr)", backgroundColor: DS.deepForest }}>
+                  <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em", borderRight: `1px solid rgba(255,255,255,0.1)` }}>Task</div>
                   {MONTHS.map(m => {
                     const phase: Phase = m <= 6 ? "P1" : m <= 12 ? "P2" : "P3";
                     const isPhaseStart = m === 1 || m === 7 || m === 13;
                     return (
-                      <div key={m} style={{ padding: "0 0 0 0", textAlign: "center", borderLeft: m===7||m===13 ? "2px solid rgba(255,255,255,0.25)" : "1px solid rgba(255,255,255,0.07)", backgroundColor: PHASE_COL_BG[phase] }}>
-                        {isPhaseStart && (
-                          <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", paddingTop: 4, paddingBottom: 1 }}>{phase}</div>
-                        )}
-                        <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)", paddingBottom: 6, paddingTop: isPhaseStart ? 0 : 10 }}>M{m}</div>
+                      <div key={m} style={{ textAlign: "center", borderLeft: m===7||m===13 ? "2px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.07)", backgroundColor: PHASE_COL_BG[phase] }}>
+                        {isPhaseStart && <div style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.1em", paddingTop: 4 }}>{phase}</div>}
+                        <div style={{ fontSize: 10, fontWeight: 500, color: "rgba(255,255,255,0.55)", paddingBottom: 5, paddingTop: isPhaseStart ? 1 : 8 }}>M{m}</div>
                       </div>
                     );
                   })}
@@ -1644,77 +1636,76 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
                   const wsItems = GANTT_ITEMS.filter(i => i.ws === ws);
                   const wc = WS_COLORS[ws];
                   return (
-                    <div key={ws} style={{ borderTop: `1px solid ${DS.border}`, display: "grid", gridTemplateColumns: "160px 1fr" }}>
-                      {/* WS label */}
-                      <div style={{ padding: "0 12px", display: "flex", alignItems: "center", backgroundColor: DS.lightGrey, borderRight: `1px solid ${DS.border}` }}>
-                        <div style={{ width: 3, height: 24, borderRadius: 2, backgroundColor: wc.bar, marginRight: 8, flexShrink: 0 }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: DS.deepForest, lineHeight: 1.3 }}>{WS_LABELS[ws].replace(/WS\d · /, "")}</span>
+                    <div key={ws} style={{ borderTop: `2px solid ${DS.border}` }}>
+                      {/* WS header row */}
+                      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", backgroundColor: DS.lightGrey }}>
+                        <div style={{ padding: "8px 16px", display: "flex", alignItems: "center", gap: 8, borderRight: `1px solid ${DS.border}` }}>
+                          <div style={{ width: 4, height: 16, borderRadius: 2, backgroundColor: wc.bar, flexShrink: 0 }} />
+                          <span style={{ fontSize: 12, fontWeight: 800, color: DS.deepForest, textTransform: "uppercase", letterSpacing: "0.05em" }}>{WS_LABELS[ws].replace(/WS\d · /, "")}</span>
+                        </div>
+                        <div style={{ borderTop: "none" }} />
                       </div>
-                      {/* Bar container */}
-                      <div style={{ position: "relative", height: wsItems.length > 0 ? wsItems.length * 32 + 10 : 38 }}>
-                        {/* Phase background columns */}
-                        {(["P1","P2","P3"] as const).map(p => {
-                          const start = p==="P1" ? 0 : p==="P2" ? 6/18 : 12/18;
-                          const width = 6/18;
-                          return (
-                            <div key={p} style={{ position: "absolute", top: 0, bottom: 0, left: `${start*100}%`, width: `${width*100}%`, backgroundColor: PHASE_COL_BG[p], pointerEvents: "none" }} />
-                          );
-                        })}
-                        {/* Phase dividers */}
-                        {[7,13].map(m => (
-                          <div key={m} style={{ position: "absolute", top: 0, bottom: 0, left: `${((m-1)/18)*100}%`, width: 1, backgroundColor: DS.border, pointerEvents: "none" }} />
-                        ))}
-                        {/* Bars */}
-                        {wsItems.map((item, rowIdx) => {
-                          const left     = ((item.start - 1) / 18) * 100;
-                          const widthPct = ((item.end - item.start + 1) / 18) * 100;
-                          const opacity  = PHASE_OPACITY[item.phase];
-                          const isItemSelected = selected?.id === item.id;
-                          const barW = (item.end - item.start + 1);
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => setSelected(isItemSelected ? null : item)}
-                              onMouseEnter={e => {
-                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                setTooltip({ item, x: rect.left + rect.width / 2, y: rect.top - 8 });
-                                (e.currentTarget as HTMLElement).style.opacity = "1";
-                                (e.currentTarget as HTMLElement).style.transform = "scaleY(1.15)";
-                                (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 12px rgba(0,0,0,0.22)`;
-                              }}
-                              onMouseLeave={e => {
-                                setTooltip(null);
-                                (e.currentTarget as HTMLElement).style.opacity = String(isItemSelected ? 1 : opacity);
-                                (e.currentTarget as HTMLElement).style.transform = "scaleY(1)";
-                                (e.currentTarget as HTMLElement).style.boxShadow = isItemSelected ? `0 0 0 2px ${DS.deepForest}` : "none";
-                              }}
-                              style={{
-                                position: "absolute",
-                                top: rowIdx * 32 + 6,
-                                left: `${left}%`,
-                                width: `${widthPct}%`,
-                                height: 24,
-                                borderRadius: 5,
-                                backgroundColor: wc.bar,
-                                border: isItemSelected ? `2px solid ${DS.deepForest}` : `1px solid rgba(0,0,0,0.08)`,
-                                cursor: "pointer",
-                                padding: "0 7px",
-                                overflow: "hidden",
-                                opacity: isItemSelected ? 1 : opacity,
-                                boxShadow: isItemSelected ? `0 0 0 2px ${DS.deepForest}` : "none",
-                                transition: "opacity 0.12s, box-shadow 0.12s, transform 0.1s",
-                                transformOrigin: "center",
-                              }}
-                            >
-                              {barW >= 3 && (
-                                <span style={{ fontSize: 10, fontWeight: 700, color: wc.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block", lineHeight: "22px" }}>
-                                  {item.label}
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
+
+                      {/* Task rows */}
+                      {wsItems.map((item, rowIdx) => {
+                        const left     = ((item.start - 1) / 18) * 100;
+                        const widthPct = ((item.end - item.start + 1) / 18) * 100;
+                        const opacity  = PHASE_OPACITY[item.phase];
+                        const isItemSelected = selected?.id === item.id;
+                        return (
+                          <div key={item.id} style={{ display: "grid", gridTemplateColumns: "240px 1fr", borderTop: `1px solid ${DS.border}`, backgroundColor: isItemSelected ? `${DS.sage}10` : DS.white, transition: "background 0.1s" }}>
+                            {/* Task name */}
+                            <div style={{ padding: "7px 16px 7px 24px", display: "flex", alignItems: "center", borderRight: `1px solid ${DS.border}`, minHeight: 36 }}>
+                              <span style={{ fontSize: 12, color: DS.textGrey, lineHeight: 1.4 }}>{item.label}</span>
+                            </div>
+                            {/* Bar row */}
+                            <div style={{ position: "relative", height: 36 }}>
+                              {/* Phase backgrounds */}
+                              {(["P1","P2","P3"] as const).map(p => (
+                                <div key={p} style={{ position: "absolute", top: 0, bottom: 0, left: `${(p==="P1"?0:p==="P2"?6:12)/18*100}%`, width: `${6/18*100}%`, backgroundColor: PHASE_COL_BG[p], pointerEvents: "none" }} />
+                              ))}
+                              {/* Phase dividers */}
+                              {[7,13].map(m => (
+                                <div key={m} style={{ position: "absolute", top: 0, bottom: 0, left: `${((m-1)/18)*100}%`, width: 1, backgroundColor: `${DS.border}`, pointerEvents: "none" }} />
+                              ))}
+                              {/* Bar */}
+                              <button
+                                onClick={() => setSelected(isItemSelected ? null : item)}
+                                onMouseEnter={e => {
+                                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                  setTooltip({ item, x: rect.left + rect.width / 2, y: rect.top - 8 });
+                                  (e.currentTarget as HTMLElement).style.opacity = "1";
+                                  (e.currentTarget as HTMLElement).style.boxShadow = `0 2px 10px rgba(0,0,0,0.2)`;
+                                  (e.currentTarget as HTMLElement).style.height = "22px";
+                                  (e.currentTarget as HTMLElement).style.top = "7px";
+                                }}
+                                onMouseLeave={e => {
+                                  setTooltip(null);
+                                  (e.currentTarget as HTMLElement).style.opacity = String(isItemSelected ? 1 : opacity);
+                                  (e.currentTarget as HTMLElement).style.boxShadow = isItemSelected ? `0 0 0 2px ${DS.deepForest}` : "none";
+                                  (e.currentTarget as HTMLElement).style.height = "16px";
+                                  (e.currentTarget as HTMLElement).style.top = "10px";
+                                }}
+                                style={{
+                                  position: "absolute",
+                                  top: 10,
+                                  left: `${left}%`,
+                                  width: `${widthPct}%`,
+                                  height: 16,
+                                  borderRadius: 4,
+                                  backgroundColor: wc.bar,
+                                  border: isItemSelected ? `2px solid ${DS.deepForest}` : "none",
+                                  cursor: "pointer",
+                                  padding: 0,
+                                  opacity: isItemSelected ? 1 : opacity,
+                                  boxShadow: isItemSelected ? `0 0 0 2px ${DS.deepForest}` : "none",
+                                  transition: "opacity 0.12s, box-shadow 0.12s, height 0.1s, top 0.1s",
+                                }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}
@@ -1724,25 +1715,26 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
               {tooltip && (
                 <div style={{
                   position: "fixed",
-                  left: tooltip.x,
+                  left: Math.min(tooltip.x, window.innerWidth - 300),
                   top: tooltip.y,
                   transform: "translate(-50%, -100%)",
                   backgroundColor: DS.deepForest,
                   borderRadius: 8,
-                  padding: "10px 14px",
-                  maxWidth: 280,
+                  padding: "12px 16px",
+                  maxWidth: 300,
                   zIndex: 100,
                   pointerEvents: "none",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-                  border: `1px solid rgba(255,255,255,0.08)`,
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+                  border: `1px solid rgba(255,255,255,0.1)`,
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                     <span style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: WS_COLORS[tooltip.item.ws].bar, flexShrink: 0 }} />
-                    <span style={{ fontSize: 10, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>{WS_LABELS[tooltip.item.ws]} · {tooltip.item.phase}</span>
-                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginLeft: "auto" }}>M{tooltip.item.start}–M{tooltip.item.end}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>{WS_LABELS[tooltip.item.ws].replace(/WS\d · /, "")} · {tooltip.item.phase}</span>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", marginLeft: "auto", flexShrink: 0 }}>M{tooltip.item.start} – M{tooltip.item.end}</span>
                   </div>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: DS.white, margin: "0 0 5px", lineHeight: 1.3 }}>{tooltip.item.label}</p>
-                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", margin: 0, lineHeight: 1.5 }}>{tooltip.item.detail.slice(0, 100)}…</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: DS.white, margin: "0 0 6px", lineHeight: 1.3 }}>{tooltip.item.label}</p>
+                  <p style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", margin: "0 0 6px", lineHeight: 1.55 }}>{tooltip.item.detail}</p>
+                  <p style={{ fontSize: 11, color: DS.sage, margin: 0 }}>Tools: {tooltip.item.tools}</p>
                 </div>
               )}
 
@@ -1752,13 +1744,13 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                       <span style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: WS_COLORS[selected.ws].bar, flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, fontWeight: 700, color: DS.sage }}>{WS_LABELS[selected.ws]}</span>
-                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>·</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: DS.sage }}>{WS_LABELS[selected.ws].replace(/WS\d · /, "")}</span>
+                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>·</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 4, padding: "1px 7px" }}>{selected.phase}</span>
-                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>M{selected.start} → M{selected.end}</span>
+                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)" }}>M{selected.start} → M{selected.end}</span>
                     </div>
                     <p style={{ fontSize: 16, fontWeight: 700, color: DS.white, margin: "0 0 10px" }}>{selected.label}</p>
-                    <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: "0 0 10px" }}>{selected.detail}</p>
+                    <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: "0 0 10px" }}>{selected.detail}</p>
                     <p style={{ fontSize: 12, color: DS.sage, margin: 0 }}>Tools: {selected.tools}</p>
                   </div>
                   <button onClick={() => setSelected(null)} style={{ color: "rgba(255,255,255,0.5)", background: "none", border: "none", cursor: "pointer", fontSize: 18, lineHeight: 1, flexShrink: 0, padding: 4 }}>✕</button>
