@@ -785,29 +785,123 @@ const AISection = ({ isMobile = false }: { isMobile?: boolean }) => {
         </div>
       </div>
 
-      {/* Priority use cases */}
-      <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, padding: 24, marginBottom: 16 }}>
-        <p style={labelStyle}>Priority Use Cases — Click for details</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {AI_PRIORITY.map((uc, i) => {
-            const isOpen = selected === i;
-            const isP1 = uc.horizon === "P1";
+      {/* AI Maturity Matrix */}
+      <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden", marginBottom: 16 }}>
+        {/* Header */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 60px 80px" : "180px 1fr 100px 110px 130px", backgroundColor: DS.deepForest }}>
+          {(isMobile
+            ? ["Process", "Mat.", "AI type"]
+            : ["Domain / Process", "How AI transforms this process", "Maturity", "AI type", "Horizon"]
+          ).map((h, i) => (
+            <div key={h} style={{ padding: "10px 14px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em", borderLeft: i > 0 ? `1px solid rgba(255,255,255,0.1)` : "none" }}>{h}</div>
+          ))}
+        </div>
+
+        {/* Rows */}
+        {[
+          // ── FINANCE ──
+          { domain: "Finance", l1: true },
+          { process: "Bank reconciliation",        how: "Auto-match transactions between Kyriba and Sage — flag exceptions only. Eliminate 2–3 FTE of manual matching.",                              pct: 10, type: "Automation AI",    horizon: "P2" },
+          { process: "Invoice processing (AP)",    how: "AI extraction from Yooz + anomaly detection on amounts and suppliers — reduce manual review to exceptions only.",                           pct: 15, type: "Doc AI",           horizon: "P2" },
+          { process: "Financial consolidation",    how: "AI-assisted variance analysis and commentary generation on monthly close — reduce time from 5 days to 2.",                                  pct: 5,  type: "Gen AI / LLM",     horizon: "P3" },
+          { process: "Budget forecasting",         how: "ML models on historical P&L per residence — auto-generate draft budgets and flag residences with deteriorating trends.",                    pct: 5,  type: "Predictive AI",    horizon: "P3" },
+          // ── COMMERCIAL ──
+          { domain: "Commercial", l1: true },
+          { process: "Lead enrichment & scoring",  how: "Auto-enrich leads via Pappers/SIRET API + ML scoring on admission probability. Replace 15 min/lead manual enrichment.",                   pct: 20, type: "Automation AI",    horizon: "P1" },
+          { process: "Meeting summarization",      how: "AI transcription and structured summary of commercial calls — auto-log to Salesforce. Save ~45 min/day per commercial.",                   pct: 5,  type: "Gen AI / LLM",     horizon: "P1" },
+          { process: "Public tender drafting",     how: "LLM pre-fills tender response templates from past winning bids + ARS specification documents. Reduce drafting time by ~60%.",              pct: 5,  type: "Gen AI / LLM",     horizon: "P2" },
+          { process: "Renewal risk scoring",       how: "ML model on resident satisfaction signals, billing history, and family contact frequency — flag at-risk residents 90 days before renewal.", pct: 0,  type: "Predictive AI",    horizon: "P3" },
+          // ── EHPAD OPS ──
+          { domain: "EHPAD Operations", l1: true },
+          { process: "ARS/Dept. declarations",     how: "AI pre-fills ARS and Departmental declarations from Agesoft data — reduce manual entry by ~80%, flag inconsistencies before submission.",  pct: 5,  type: "Doc AI",           horizon: "P2" },
+          { process: "Occupancy forecasting",      how: "ML on historical occupancy, admission pipeline, and seasonal patterns — 3–6 month horizon per residence. Feed commercial and HR planning.", pct: 0,  type: "Predictive AI",    horizon: "P3" },
+          { process: "Care plan documentation",    how: "AI-assisted structured note-taking for care plans — voice-to-text with clinical NLP. GDPR on health data: requires specific governance.",   pct: 0,  type: "Gen AI / LLM",     horizon: "P3" },
+          { process: "Room availability alerts",   how: "Automated Agesoft trigger on room status change → Salesforce pipeline update. Not strictly AI but prerequisite for AI use cases.",         pct: 10, type: "Automation AI",    horizon: "P1" },
+          // ── HR ──
+          { domain: "HR", l1: true },
+          { process: "Job posting generation",     how: "LLM drafts job postings from role template + residence context — reduce HR writing time by ~70% per posting.",                             pct: 30, type: "Gen AI / LLM",     horizon: "P1" },
+          { process: "CV screening & shortlisting",how: "AI scores CVs against job criteria in Lucas — surface top 5 candidates per role, flag skill gaps. Reduce sourcing time by 50%.",           pct: 10, type: "Automation AI",    horizon: "P2" },
+          { process: "Onboarding content",         how: "AI-generated personalized onboarding documents per role and residence — pulled from PILA templates and Lucas records.",                     pct: 20, type: "Gen AI / LLM",     horizon: "P1" },
+          { process: "Training recommendation",    how: "ML on employee profile, skills gap, and 360Learning catalog — auto-recommend training paths per employee. Increase completion rates.",      pct: 15, type: "Predictive AI",    horizon: "P2" },
+          { process: "Absenteeism prediction",     how: "ML on historical absence patterns, shift load, and seasonal data — predict high-risk periods and trigger preventive actions.",              pct: 0,  type: "Predictive AI",    horizon: "P3" },
+          // ── DATA & IT ──
+          { domain: "Data & IT", l1: true },
+          { process: "IT helpdesk triage",         how: "LLM classifies incoming tickets, suggests resolution from knowledge base, auto-escalates critical issues. Reduce L1 resolution time.",     pct: 5,  type: "Gen AI / LLM",     horizon: "P2" },
+          { process: "Data quality monitoring",    how: "AI anomaly detection on data pipeline outputs — flag broken flows, duplicate records, or outlier values before they reach dashboards.",     pct: 0,  type: "Automation AI",    horizon: "P2" },
+          { process: "BI narrative generation",    how: "LLM auto-generates written commentary on Power BI reports — monthly management pack, variance explanations, CFO-ready summaries.",         pct: 0,  type: "Gen AI / LLM",     horizon: "P3" },
+          // ── QUALITY ──
+          { domain: "Quality & Compliance", l1: true },
+          { process: "Adverse event analysis",     how: "NLP on Qualineo incident reports — cluster root causes, surface patterns across residences, auto-suggest corrective actions.",              pct: 0,  type: "Doc AI",           horizon: "P3" },
+          { process: "Audit preparation",          how: "AI pre-fills Qualineo audit checklists from Agesoft and operational data — flag missing items before the ARS inspection.",                  pct: 0,  type: "Automation AI",    horizon: "P2" },
+        ].map((row, idx) => {
+          if ("l1" in row) {
             return (
-              <div key={i} style={{ borderRadius: 10, border: `1.5px solid ${isOpen ? DS.forestMed : DS.border}`, overflow: "hidden" }}>
-                <button onClick={() => setSelected(isOpen ? null : i)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", background: "none", border: "none", cursor: "pointer", textAlign: "left", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 20, backgroundColor: isP1 ? DS.redBg : DS.amberBg, color: isP1 ? DS.darkRed : DS.saddleBrown, flexShrink: 0 }}>{uc.horizon}</span>
-                  <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: DS.deepForest, minWidth: 120 }}>{uc.title}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: DS.forestMed, backgroundColor: DS.lightGrey, borderRadius: 20, padding: "3px 10px", flexShrink: 0 }}>{uc.roi}</span>
-                  <span style={{ color: DS.sageLight, flexShrink: 0 }}>{isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>
-                </button>
-                {isOpen && (
-                  <div style={{ padding: "0 18px 18px", backgroundColor: DS.lightGrey, borderTop: `1px solid ${DS.border}` }}>
-                    <p style={{ fontSize: 14, color: DS.textGrey, lineHeight: 1.75, margin: "14px 0 0" }}>{uc.detail}</p>
-                  </div>
-                )}
+              <div key={row.domain} style={{ padding: "8px 14px", backgroundColor: DS.lightGrey, borderTop: `2px solid ${DS.border}` }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: DS.deepForest, textTransform: "uppercase", letterSpacing: "0.08em" }}>{row.domain}</span>
               </div>
             );
-          })}
+          }
+          const r = row as { process: string; how: string; pct: number; type: string; horizon: string };
+          const isP1 = r.horizon === "P1";
+          const isP2 = r.horizon === "P2";
+          // Maturity circle
+          const radius = 10;
+          const circ = 2 * Math.PI * radius;
+          const dash = (r.pct / 100) * circ;
+          const typeColor: Record<string, string> = {
+            "Gen AI / LLM":   DS.forestMed,
+            "Automation AI":  DS.sage,
+            "Predictive AI":  DS.saddleBrown,
+            "Doc AI":         DS.textGrey,
+          };
+          return (
+            <div key={r.process} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 60px 80px" : "180px 1fr 100px 110px 130px", borderTop: `1px solid ${DS.border}`, backgroundColor: DS.white }}>
+              <div style={{ padding: "10px 14px 10px 22px", display: "flex", alignItems: "center" }}>
+                <span style={{ fontSize: 12, color: DS.deepForest, fontWeight: 600, lineHeight: 1.35 }}>{r.process}</span>
+              </div>
+              {!isMobile && (
+                <div style={{ padding: "10px 14px", borderLeft: `1px solid ${DS.border}`, display: "flex", alignItems: "center" }}>
+                  <span style={{ fontSize: 12, color: DS.textGrey, lineHeight: 1.55 }}>{r.how}</span>
+                </div>
+              )}
+              {/* Maturity circle */}
+              <div style={{ padding: "8px 14px", borderLeft: `1px solid ${DS.border}`, display: "flex", alignItems: "center", gap: 8 }}>
+                <svg width="26" height="26" viewBox="0 0 26 26" style={{ flexShrink: 0 }}>
+                  <circle cx="13" cy="13" r={radius} fill="none" stroke={DS.border} strokeWidth="2.5" />
+                  <circle cx="13" cy="13" r={radius} fill="none" stroke={r.pct === 0 ? DS.border : DS.forestMed} strokeWidth="2.5"
+                    strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ / 4}
+                    strokeLinecap="round" transform="rotate(-90 13 13)" />
+                </svg>
+                <span style={{ fontSize: 11, fontWeight: 700, color: r.pct === 0 ? DS.textGrey : DS.forestMed }}>{r.pct}%</span>
+              </div>
+              {/* AI type */}
+              <div style={{ padding: "8px 14px", borderLeft: `1px solid ${DS.border}`, display: "flex", alignItems: "center" }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: typeColor[r.type] ?? DS.textGrey }}>{r.type}</span>
+              </div>
+              {!isMobile && (
+                <div style={{ padding: "8px 14px", borderLeft: `1px solid ${DS.border}`, display: "flex", alignItems: "center" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: isP1 ? DS.darkRed : isP2 ? DS.saddleBrown : DS.textGrey, backgroundColor: isP1 ? DS.redBg : isP2 ? DS.amberBg : DS.lightGrey, borderRadius: 4, padding: "2px 8px" }}>{r.horizon}</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Legend */}
+        <div style={{ padding: "12px 16px", backgroundColor: DS.lightGrey, borderTop: `2px solid ${DS.border}`, display: "flex", gap: 20, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: DS.textGrey }}>AI Type →</span>
+          {[
+            ["Gen AI / LLM", DS.forestMed, "Large language models — drafting, summarization, Q&A"],
+            ["Automation AI", DS.sage,     "Rule-based or ML automation — no generative output"],
+            ["Predictive AI", DS.saddleBrown, "ML forecasting and scoring models"],
+            ["Doc AI", DS.textGrey,        "Document extraction, OCR, NLP on structured docs"],
+          ].map(([label, color, desc]) => (
+            <div key={label as string} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: color as string, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: color as string, fontWeight: 600 }}>{label as string}</span>
+              {!isMobile && <span style={{ fontSize: 11, color: DS.textGrey }}>{desc as string}</span>}
+            </div>
+          ))}
         </div>
       </div>
 
