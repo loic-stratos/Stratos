@@ -1405,10 +1405,29 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
 type Phase = "P1" | "P2" | "P3";
 interface GanttItem { id: string; ws: 1|2|3|4; label: string; start: number; end: number; phase: Phase; detail: string; tools: string; }
 
+// Workstream colors — DS-compliant, distinct per WS
+const WS_COLORS: Record<number, { bar: string; barHover: string; text: string }> = {
+  1: { bar: DS.sage,       barHover: "#7DA994", text: DS.deepForest },  // Tools — Sage
+  2: { bar: DS.forestMed,  barHover: "#0F3329", text: DS.white      },  // Data — Forest Med
+  3: { bar: "#4A7C6A",     barHover: "#3A6258", text: DS.white      },  // Process — mid green
+  4: { bar: DS.amber,      barHover: "#B8732E", text: DS.deepForest },  // AI — Amber
+};
+
+// Phase opacity — P1 full, P2 medium, P3 subtle
+const PHASE_OPACITY: Record<Phase, number> = { P1: 1, P2: 0.75, P3: 0.55 };
+
+// Column background per phase zone
+const PHASE_COL_BG: Record<Phase, string> = {
+  P1: "rgba(255,255,255,0.03)",
+  P2: "rgba(255,255,255,0.0)",
+  P3: "rgba(0,0,0,0.06)",
+};
+
+// Keep for mobile card view
 const PHASE_COLORS: Record<Phase, { bg: string; text: string; border: string }> = {
-  P1: { bg: DS.forestMed, text: DS.white,       border: DS.forestMed },
-  P2: { bg: DS.saddleBrown, text: DS.white,  border: "#7C2D12" },
-  P3: { bg: DS.forestMed, text: DS.white,       border: DS.deepForest },
+  P1: { bg: DS.sage,      text: DS.deepForest, border: DS.sage     },
+  P2: { bg: "#4A7C6A",    text: DS.white,       border: "#4A7C6A"  },
+  P3: { bg: DS.forestMed, text: DS.white,       border: DS.forestMed },
 };
 
 const WS_LABELS: Record<number, string> = {
@@ -1473,14 +1492,10 @@ const BUSINESS_OBJECTIVES = [
 const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [subTab,   setSubTab]   = useState<"objectives"|"gantt"|"workstreams"|"phases">("objectives");
   const [selected, setSelected] = useState<GanttItem | null>(null);
-  const [phaseFilter, setPhaseFilter] = useState<Phase | "all">("all");
+  const [tooltip, setTooltip] = useState<{ item: GanttItem; x: number; y: number } | null>(null);
 
   const MONTHS = Array.from({ length: 18 }, (_, i) => i + 1);
   const WS_IDS = [1, 2, 3, 4] as const;
-
-  const filteredItems = phaseFilter === "all"
-    ? GANTT_ITEMS
-    : GANTT_ITEMS.filter(i => i.phase === phaseFilter);
 
   const WS_DETAIL: Record<number, { p1: string[]; p2: string[]; p3: string[] }> = {
     1: {
@@ -1547,32 +1562,12 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
       {/* ── GANTT ── */}
       {subTab === "gantt" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* Legend + filter */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {(["all","P1","P2","P3"] as const).map(p => (
-                <button key={p} onClick={() => setPhaseFilter(p)} style={{ padding: "5px 14px", borderRadius: 20, border: `1.5px solid ${phaseFilter === p ? DS.deepForest : DS.border}`, cursor: "pointer", fontSize: 12, fontWeight: 600, backgroundColor: phaseFilter === p ? DS.deepForest : DS.white, color: phaseFilter === p ? DS.white : DS.textGrey }}>
-                  {p === "all" ? "All phases" : p}
-                </button>
-              ))}
-            </div>
-            {!isMobile && (
-              <div style={{ display: "flex", gap: 12 }}>
-                {(["P1","P2","P3"] as const).map(p => (
-                  <div key={p} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: PHASE_COLORS[p].bg }} />
-                    <span style={{ fontSize: 12, color: DS.textGrey }}>{p} {p==="P1"?"M1–M6":p==="P2"?"M7–M12":"M13–M18"}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* ── MOBILE: card list ── */}
           {isMobile ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {WS_IDS.map(ws => {
-                const wsItems = filteredItems.filter(i => i.ws === ws);
+                const wsItems = GANTT_ITEMS.filter(i => i.ws === ws);
                 if (!wsItems.length) return null;
                 return (
                   <div key={ws}>
@@ -1585,14 +1580,11 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
                         const isOpen = selected?.id === item.id;
                         return (
                           <div key={item.id} style={{ borderTop: idx > 0 ? `1px solid ${DS.border}` : "none" }}>
-                            <button
-                              onClick={() => setSelected(isOpen ? null : item)}
-                              style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: isOpen ? DS.lightGrey : DS.white, border: "none", cursor: "pointer", textAlign: "left" }}
-                            >
-                              <span style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: pc.bg, border: `1.5px solid ${pc.border}`, flexShrink: 0 }} />
+                            <button onClick={() => setSelected(isOpen ? null : item)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", background: isOpen ? DS.lightGrey : DS.white, border: "none", cursor: "pointer", textAlign: "left" }}>
+                              <span style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: pc.bg, flexShrink: 0 }} />
                               <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: DS.deepForest }}>{item.label}</span>
-                              <span style={{ fontSize: 11, color: DS.sageLight, flexShrink: 0 }}>M{item.start}→M{item.end}</span>
-                              <span style={{ fontSize: 11, fontWeight: 700, color: pc.text, backgroundColor: pc.bg, borderRadius: 20, padding: "1px 8px", flexShrink: 0 }}>{item.phase}</span>
+                              <span style={{ fontSize: 11, color: DS.textGrey, flexShrink: 0 }}>M{item.start}→M{item.end}</span>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: pc.text, backgroundColor: pc.bg, borderRadius: 4, padding: "1px 6px", flexShrink: 0 }}>{item.phase}</span>
                             </button>
                             {isOpen && (
                               <div style={{ padding: "12px 14px", backgroundColor: DS.deepForest }}>
@@ -1611,58 +1603,165 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
           ) : (
             <>
               {/* ── DESKTOP: Gantt grid ── */}
-              <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
-                {/* Month header */}
-                <div style={{ display: "grid", gridTemplateColumns: "160px repeat(18, 1fr)", backgroundColor: DS.deepForest }}>
-                  <div style={{ padding: "8px 12px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>Workstream</div>
-                  {MONTHS.map(m => (
-                    <div key={m} style={{ padding: "8px 4px", fontSize: 11, fontWeight: 700, color: m<=6 ? DS.sage : m<=12 ? DS.amber : DS.sageLight, textAlign: "center", borderLeft: m===7||m===13 ? "2px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.07)" }}>
-                      M{m}
+              {/* WS legend */}
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 8 }}>
+                {WS_IDS.map(ws => (
+                  <div key={ws} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: WS_COLORS[ws].bar }} />
+                    <span style={{ fontSize: 12, color: DS.textGrey }}>{WS_LABELS[ws]}</span>
+                  </div>
+                ))}
+                <div style={{ marginLeft: "auto", display: "flex", gap: 12 }}>
+                  {(["P1","P2","P3"] as const).map(p => (
+                    <div key={p} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ width: 12, height: 4, borderRadius: 2, backgroundColor: DS.textGrey, opacity: PHASE_OPACITY[p] }} />
+                      <span style={{ fontSize: 11, color: DS.textGrey }}>{p} {p==="P1"?"M1–M6":p==="P2"?"M7–M12":"M13–M18"}</span>
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden" }}>
+                {/* Month header */}
+                <div style={{ display: "grid", gridTemplateColumns: "160px repeat(18, 1fr)", backgroundColor: DS.deepForest }}>
+                  <div style={{ padding: "10px 12px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>Workstream</div>
+                  {MONTHS.map(m => {
+                    const phase: Phase = m <= 6 ? "P1" : m <= 12 ? "P2" : "P3";
+                    const isPhaseStart = m === 1 || m === 7 || m === 13;
+                    return (
+                      <div key={m} style={{ padding: "0 0 0 0", textAlign: "center", borderLeft: m===7||m===13 ? "2px solid rgba(255,255,255,0.25)" : "1px solid rgba(255,255,255,0.07)", backgroundColor: PHASE_COL_BG[phase] }}>
+                        {isPhaseStart && (
+                          <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", paddingTop: 4, paddingBottom: 1 }}>{phase}</div>
+                        )}
+                        <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)", paddingBottom: 6, paddingTop: isPhaseStart ? 0 : 10 }}>M{m}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 {/* WS rows */}
                 {WS_IDS.map(ws => {
-                  const wsItems = filteredItems.filter(i => i.ws === ws);
+                  const wsItems = GANTT_ITEMS.filter(i => i.ws === ws);
+                  const wc = WS_COLORS[ws];
                   return (
-                    <div key={ws} style={{ borderTop: `1px solid ${DS.border}` }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", padding: "6px 0", backgroundColor: DS.lightGrey }}>
-                        <div style={{ padding: "4px 12px", fontSize: 11, fontWeight: 700, color: DS.deepForest }}>{WS_LABELS[ws]}</div>
-                        <div style={{ position: "relative", height: wsItems.length > 0 ? wsItems.length * 28 + 8 : 28 }}>
-                          {wsItems.map((item, rowIdx) => {
-                            const left  = ((item.start - 1) / 18) * 100;
-                            const width = ((item.end - item.start + 1) / 18) * 100;
-                            const pc = PHASE_COLORS[item.phase];
-                            const isItemSelected = selected?.id === item.id;
-                            return (
-                              <button key={item.id} onClick={() => setSelected(isItemSelected ? null : item)}
-                                title={item.label}
-                                style={{ position: "absolute", top: rowIdx * 28 + 4, left: `${left}%`, width: `${width}%`, height: 22, borderRadius: 4, backgroundColor: pc.bg, border: `1.5px solid ${isItemSelected ? DS.white : pc.border}`, cursor: "pointer", padding: "0 6px", overflow: "hidden", boxShadow: isItemSelected ? "0 0 0 2px " + DS.sage : "none" }}>
-                                <span style={{ fontSize: 10, fontWeight: 700, color: pc.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>{item.label}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
+                    <div key={ws} style={{ borderTop: `1px solid ${DS.border}`, display: "grid", gridTemplateColumns: "160px 1fr" }}>
+                      {/* WS label */}
+                      <div style={{ padding: "0 12px", display: "flex", alignItems: "center", backgroundColor: DS.lightGrey, borderRight: `1px solid ${DS.border}` }}>
+                        <div style={{ width: 3, height: 24, borderRadius: 2, backgroundColor: wc.bar, marginRight: 8, flexShrink: 0 }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: DS.deepForest, lineHeight: 1.3 }}>{WS_LABELS[ws].replace(/WS\d · /, "")}</span>
+                      </div>
+                      {/* Bar container */}
+                      <div style={{ position: "relative", height: wsItems.length > 0 ? wsItems.length * 32 + 10 : 38 }}>
+                        {/* Phase background columns */}
+                        {(["P1","P2","P3"] as const).map(p => {
+                          const start = p==="P1" ? 0 : p==="P2" ? 6/18 : 12/18;
+                          const width = 6/18;
+                          return (
+                            <div key={p} style={{ position: "absolute", top: 0, bottom: 0, left: `${start*100}%`, width: `${width*100}%`, backgroundColor: PHASE_COL_BG[p], pointerEvents: "none" }} />
+                          );
+                        })}
+                        {/* Phase dividers */}
+                        {[7,13].map(m => (
+                          <div key={m} style={{ position: "absolute", top: 0, bottom: 0, left: `${((m-1)/18)*100}%`, width: 1, backgroundColor: DS.border, pointerEvents: "none" }} />
+                        ))}
+                        {/* Bars */}
+                        {wsItems.map((item, rowIdx) => {
+                          const left     = ((item.start - 1) / 18) * 100;
+                          const widthPct = ((item.end - item.start + 1) / 18) * 100;
+                          const opacity  = PHASE_OPACITY[item.phase];
+                          const isItemSelected = selected?.id === item.id;
+                          const barW = (item.end - item.start + 1);
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => setSelected(isItemSelected ? null : item)}
+                              onMouseEnter={e => {
+                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                setTooltip({ item, x: rect.left + rect.width / 2, y: rect.top - 8 });
+                                (e.currentTarget as HTMLElement).style.opacity = "1";
+                                (e.currentTarget as HTMLElement).style.transform = "scaleY(1.15)";
+                                (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 12px rgba(0,0,0,0.22)`;
+                              }}
+                              onMouseLeave={e => {
+                                setTooltip(null);
+                                (e.currentTarget as HTMLElement).style.opacity = String(isItemSelected ? 1 : opacity);
+                                (e.currentTarget as HTMLElement).style.transform = "scaleY(1)";
+                                (e.currentTarget as HTMLElement).style.boxShadow = isItemSelected ? `0 0 0 2px ${DS.deepForest}` : "none";
+                              }}
+                              style={{
+                                position: "absolute",
+                                top: rowIdx * 32 + 6,
+                                left: `${left}%`,
+                                width: `${widthPct}%`,
+                                height: 24,
+                                borderRadius: 5,
+                                backgroundColor: wc.bar,
+                                border: isItemSelected ? `2px solid ${DS.deepForest}` : `1px solid rgba(0,0,0,0.08)`,
+                                cursor: "pointer",
+                                padding: "0 7px",
+                                overflow: "hidden",
+                                opacity: isItemSelected ? 1 : opacity,
+                                boxShadow: isItemSelected ? `0 0 0 2px ${DS.deepForest}` : "none",
+                                transition: "opacity 0.12s, box-shadow 0.12s, transform 0.1s",
+                                transformOrigin: "center",
+                              }}
+                            >
+                              {barW >= 3 && (
+                                <span style={{ fontSize: 10, fontWeight: 700, color: wc.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block", lineHeight: "22px" }}>
+                                  {item.label}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Detail panel */}
+              {/* Floating tooltip */}
+              {tooltip && (
+                <div style={{
+                  position: "fixed",
+                  left: tooltip.x,
+                  top: tooltip.y,
+                  transform: "translate(-50%, -100%)",
+                  backgroundColor: DS.deepForest,
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  maxWidth: 280,
+                  zIndex: 100,
+                  pointerEvents: "none",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                  border: `1px solid rgba(255,255,255,0.08)`,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: WS_COLORS[tooltip.item.ws].bar, flexShrink: 0 }} />
+                    <span style={{ fontSize: 10, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em" }}>{WS_LABELS[tooltip.item.ws]} · {tooltip.item.phase}</span>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginLeft: "auto" }}>M{tooltip.item.start}–M{tooltip.item.end}</span>
+                  </div>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: DS.white, margin: "0 0 5px", lineHeight: 1.3 }}>{tooltip.item.label}</p>
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", margin: 0, lineHeight: 1.5 }}>{tooltip.item.detail.slice(0, 100)}…</p>
+                </div>
+              )}
+
+              {/* Detail panel — click for full info */}
               {selected && (
                 <div style={{ backgroundColor: DS.deepForest, borderRadius: 12, padding: 24, display: "flex", gap: 20, alignItems: "flex-start" }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, padding: "2px 10px", borderRadius: 20, backgroundColor: PHASE_COLORS[selected.phase].bg, color: PHASE_COLORS[selected.phase].text }}>{selected.phase}</span>
-                      <span style={{ fontSize: 11, color: DS.sageLight }}>{WS_LABELS[selected.ws]}</span>
-                      <span style={{ fontSize: 11, color: DS.sageLight }}>· M{selected.start} → M{selected.end}</span>
+                      <span style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: WS_COLORS[selected.ws].bar, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, fontWeight: 700, color: DS.sage }}>{WS_LABELS[selected.ws]}</span>
+                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>·</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 4, padding: "1px 7px" }}>{selected.phase}</span>
+                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>M{selected.start} → M{selected.end}</span>
                     </div>
                     <p style={{ fontSize: 16, fontWeight: 700, color: DS.white, margin: "0 0 10px" }}>{selected.label}</p>
                     <p style={{ fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: "0 0 10px" }}>{selected.detail}</p>
-                    <p style={{ fontSize: 12, color: DS.sage, margin: 0 }}>Tools involved: {selected.tools}</p>
+                    <p style={{ fontSize: 12, color: DS.sage, margin: 0 }}>Tools: {selected.tools}</p>
                   </div>
-                  <button onClick={() => setSelected(null)} style={{ color: DS.sageLight, background: "none", border: "none", cursor: "pointer", fontSize: 20, lineHeight: 1, flexShrink: 0 }}>✕</button>
+                  <button onClick={() => setSelected(null)} style={{ color: "rgba(255,255,255,0.5)", background: "none", border: "none", cursor: "pointer", fontSize: 18, lineHeight: 1, flexShrink: 0, padding: 4 }}>✕</button>
                 </div>
               )}
             </>
