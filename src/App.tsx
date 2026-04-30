@@ -2435,9 +2435,14 @@ const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => {
     <div style={{ width: isMobile ? "100%" : 420, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: isMobile ? "40px 24px 32px" : "52px 48px", borderRight: isMobile ? "none" : "1px solid rgba(255,255,255,0.07)", borderBottom: isMobile ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
       {/* Header */}
       <div>
-        {/* Logo */}
+        {/* Logo — links to stratos.club */}
         <div style={{ marginBottom: isMobile ? 28 : 40 }}>
-          <img src={LOGO_BLANC} alt="Stratos" style={{ height: 26, display: "block" }} />
+          <a href="https://stratos.club" target="_blank" rel="noopener noreferrer" style={{ display: "inline-block" }}>
+            <img src={LOGO_BLANC} alt="Stratos" style={{ height: 26, display: "block" }} />
+          </a>
+        </div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 7, backgroundColor: "rgba(147,183,163,0.12)", border: "1px solid rgba(147,183,163,0.2)", borderRadius: 20, padding: "5px 12px", marginBottom: 16 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: DS.sage, letterSpacing: "0.1em", textTransform: "uppercase" }}>IT Audit Template</span>
         </div>
         <p style={{ fontSize: 11, fontWeight: 700, color: DS.sageLight, textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 12px" }}>Audit Report · April 2026</p>
         <h1 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 900, color: DS.white, lineHeight: 1.15, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
@@ -2501,6 +2506,30 @@ const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => {
             <p style={{ fontSize: 11, color: DS.sageLight, margin: 0 }}>{k.l}</p>
           </div>
         ))}
+      </div>
+
+      {/* Audit Team */}
+      <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <p style={{ fontSize: 10, fontWeight: 700, color: DS.sageLight, textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 16px" }}>Audit Team</p>
+        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          {[
+            { name: "Frédéric Blachon",   title: "Partner",        initials: "FB" },
+            { name: "Stanislas Hauchard", title: "Partner",        initials: "SH" },
+            { name: "Rachid Maadoum",     title: "Senior Manager", initials: "RM" },
+            { name: "Loïc Moisand",       title: "Manager",        initials: "LM" },
+            { name: "Alexis Deudon",      title: "Consultant",     initials: "AD" },
+          ].map(p => (
+            <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: DS.sage }}>{p.initials}</span>
+              </div>
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 600, color: DS.white, margin: "0 0 1px" }}>{p.name}</p>
+                <p style={{ fontSize: 11, color: DS.sageLight, margin: 0 }}>{p.title}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </div>
@@ -2614,9 +2643,12 @@ export default function AuditReport() {
   const SidebarContent = () => (
     <>
       <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <button onClick={() => navigate("landing")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 16, display: "block" }}>
-          <img src={LOGO_BLANC} alt="Stratos" style={{ height: 22, display: "block" }} />
-        </button>
+        <div style={{ marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button onClick={() => navigate("landing")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+            <img src={LOGO_BLANC} alt="Stratos" style={{ height: 22, display: "block" }} />
+          </button>
+          <a href="https://stratos.club" target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: DS.sageLight, textDecoration: "none", fontWeight: 600, letterSpacing: "0.05em" }}>↗</a>
+        </div>
         <p style={{ fontSize: 13, fontWeight: 700, color: DS.white, margin: "0 0 2px", lineHeight: 1.3 }}>IT, Data & AI Audit</p>
         <p style={{ fontSize: 12, color: DS.sageLight, margin: 0 }}>Groupement EHPAD</p>
       </div>
