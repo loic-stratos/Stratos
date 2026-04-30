@@ -37,7 +37,8 @@ const NAV = [
   { id: "data",           label: "04 · Data",                icon: Database   },
   { id: "processus",      label: "05 · Processes",           icon: Settings   },
   { id: "ia",             label: "06 · AI",                  icon: Zap        },
-  { id: "transformation", label: "07 · Transformation Plan", icon: Target     },
+  { id: "recommandations", label: "07 · Recommendations",    icon: FileText   },
+  { id: "transformation", label: "08 · Transformation Plan", icon: Target     },
 ];
 
 // ─── HIGHLIGHTS DATA ────────────────────────────────────────────────────────
@@ -1401,7 +1402,260 @@ const ProcessSection = ({ isMobile = false }: { isMobile?: boolean }) => {
   );
 };
 
-// ─── TRANSFORMATION PLAN DATA ────────────────────────────────────────────────
+// ─── SECTION 07 — RECOMMENDATIONS ───────────────────────────────────────────
+const RecommandationsSection = ({ isMobile = false }: { isMobile?: boolean }) => {
+  const [openRec, setOpenRec] = useState<string | null>(null);
+  const toggleRec = (id: string) => setOpenRec(prev => prev === id ? null : id);
+
+  const RECS = [
+    {
+      id: "R01", horizon: "P1",
+      title: "Stabilize and rationalize the application portfolio",
+      preview: "Decommission legacy tools, repair critical integrations, and establish a clear tool governance policy.",
+      content: "Decommission Turbo, EBP Compta, Sage 50, and Microsoft Dynamics within the first 6 months. Repair the Salesforce Outlook sync and email logging. Reactivate Lucas HRIS with a structured change management plan. Establish a formal application governance policy: any new tool acquisition requires DSI validation, functional justification, and integration assessment.",
+      impact: "~60K€/year in license savings. Elimination of data duplication and shadow IT at the most critical layers of the stack.",
+    },
+    {
+      id: "R02", horizon: "P1",
+      title: "Document and secure the in-house ESB before any other data initiative",
+      preview: "The current data pipeline depends on a single undocumented developer. This is the Group's most acute technical risk.",
+      content: "Commission a full technical audit of the DataHub/ESB codebase. Produce end-to-end flow documentation, a data dictionary, and an incident runbook. Implement basic monitoring and alerting on all active flows. Identify a backup developer or external partner to reduce single-point-of-failure exposure.",
+      impact: "Risk reduction on operational continuity. Prerequisite for any BI, AI, or data platform initiative.",
+    },
+    {
+      id: "R03", horizon: "P1",
+      title: "Build the 4 master data references that are currently missing",
+      preview: "No shared identifiers exist across systems for residences, suppliers, employees, or residents.",
+      content: "Define and publish four master data references: (1) Residence master — unique identifier, region, ARS code, capacity; (2) Supplier master — consolidated across Sage, Kyriba, Agesoft; (3) Employee master — reconciled between Lucas, Cegid Paie, and operational systems; (4) Resident master — reconciled between Agesoft and Salesforce. Assign a data owner for each reference with a quarterly review process.",
+      impact: "Direct unblocking condition for the Bronze/Silver/Gold data architecture. Required for any group-level BI or AI initiative.",
+    },
+    {
+      id: "R04", horizon: "P1-P2",
+      title: "Deploy a GED and a group IT ticketing tool",
+      preview: "Two critical tools are absent from the current stack: document management and IT support tracking.",
+      content: "Deploy a GED (document management system with OCR) to digitize admission documents, financial records, and HR files — replacing the current mix of email attachments and local storage. Deploy a dedicated IT ticketing tool (replacing the current misuse of Qualineo) to track incidents, manage SLAs, and produce a Group IT dashboard. Both tools should integrate with Microsoft 365 and be operational by M6.",
+      impact: "Elimination of document loss risk. Structured IT support with SLA visibility. Qualineo refocused on its core quality management purpose.",
+    },
+    {
+      id: "R05", horizon: "P2",
+      title: "Deploy the Bronze/Silver/Gold data architecture",
+      preview: "Replace the fragile ESB-based pipeline with a documented, scalable medallion data architecture.",
+      content: "Bronze layer: automated daily ingestion from Sage (OData), Agesoft (API), Salesforce (API), Lucas (API), Kyriba (API). Silver layer: cleansed, deduplicated, and cross-referenced master data built on top of the 4 references defined in R03. Gold layer: certified reporting datasets serving Power BI dashboards — occupancy, P&L by residence, HR headcount, commercial pipeline. Full documentation and automated monitoring from day one.",
+      impact: "First reliable group-level BI dashboards live by M12. Foundation for all future AI use cases. Estimated data stack investment: 95K€/year.",
+    },
+    {
+      id: "R06", horizon: "P2",
+      title: "Structure IT governance with a formal steering committee",
+      preview: "No formal IT governance exists — decisions are made reactively with no steering, no prioritization, and no ROI tracking.",
+      content: "Establish a monthly Group IT Steering Committee (COPIL SI) with CFO, CEO, and DSI. Define an IT investment validation process: business case, ROI target, integration requirements. Implement a quarterly IT dashboard covering tool adoption rates, incident volumes, project status, and budget tracking. Appoint a Group CTO or fractional DSI to own the roadmap.",
+      impact: "Structural governance reform. Direct impact on investment ROI tracking and roadmap execution discipline.",
+    },
+    {
+      id: "R07", horizon: "P2-P3",
+      title: "Launch the first AI use cases on solid data foundations",
+      preview: "AI initiatives should only be launched once data foundations are in place — starting with the highest-ROI, lowest-risk use cases.",
+      content: "Three priority use cases for P2, contingent on Silver data layer being live: (1) AI-assisted bank reconciliation (Kyriba/Sage) — 2–3 FTE freed; (2) AI public tender drafting assistant — 1 FTE freed, quality improvement; (3) Commercial meeting summary assistant — 0.5 FTE freed per commercial. P3 use cases: Salesforce renewal risk scoring, ARS compliance monitoring, predictive occupancy forecasting.",
+      impact: "Estimated 4–6 FTE freed across Finance, Commercial, and Operations. Required governance: AI policy, GDPR review on resident data, quarterly AI committee.",
+    },
+  ];
+
+  // Green tools from inventory (status ok)
+  const GREEN_TOOLS = TOOLS_FRANCE.flatMap(c =>
+    c.tools.filter(t => t.status === "ok").map(t => ({ name: t.name, category: c.category }))
+  );
+  const NEW_TOOLS = [
+    { name: "GED + OCR", category: "Document Management", note: "New" },
+    { name: "IT Ticketing", category: "IT Operations", note: "New" },
+  ];
+  const DATA_TOOLS = [
+    { name: "Data Pipeline (ESB v2)", note: "Rebuild" },
+    { name: "Bronze / Silver / Gold layers", note: "New" },
+    { name: "Power BI / MS Fabric", note: "Reactivate" },
+  ];
+
+  // Budget table
+  const BUDGET = {
+    headers: ["", "Year 1", "Year 2", "Year 3", "3-Year Total"],
+    rows: [
+      { label: "Existing IT costs (retained tools)", values: [1536, 1536, 1536], type: "neutral" as const },
+      { label: "Decommissioning savings", values: [-60, -60, -60], type: "positive" as const },
+      { label: "Data stack (new)", values: [95, 95, 95], type: "investment" as const },
+      { label: "New tools (GED, ticketing)", values: [39, 39, 39], type: "investment" as const },
+      { label: "Integration & change management", values: [120, 60, 30], type: "investment" as const },
+      { label: "AI tools & licenses", values: [0, 45, 90], type: "investment" as const },
+    ],
+  };
+
+  const rowTotals = BUDGET.rows.map(r => r.values.reduce((s, v) => s + v, 0));
+  const yearTotals = [0, 1, 2].map(yi => BUDGET.rows.reduce((s, r) => s + r.values[yi], 0));
+  const grandTotal = yearTotals.reduce((s, v) => s + v, 0);
+  const fmt = (n: number) => (n < 0 ? "−" : "") + Math.abs(Math.round(n)).toLocaleString("fr-FR") + " K€";
+  const fmtColor = (n: number) => n < 0 ? DS.forestMed : n === 0 ? DS.textGrey : DS.deepForest;
+
+  return (
+    <div>
+      <div style={{ marginBottom: 32 }}>
+        <span style={labelStyle}>Section 07</span>
+        <h1 style={h1Style}>Recommendations</h1>
+      </div>
+
+      {/* Intro */}
+      <div style={{ ...card, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, color: DS.textGrey, lineHeight: 1.8, margin: 0 }}>
+          The following recommendations synthesize the key findings of this audit into <strong style={{ color: DS.deepForest }}>7 prioritized action areas</strong>, organized across the 18-month transformation horizon. Each recommendation maps directly to the workstreams detailed in the Transformation Plan. The section also presents the target IT stack, the data architecture blueprint, and a 3-year budget projection.
+        </p>
+      </div>
+
+      {/* 7 Recommendations — article card pattern */}
+      <p style={{ ...labelStyle, marginBottom: 12 }}>7 Priority Recommendations</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
+        {RECS.map(r => {
+          const isOpen = openRec === r.id;
+          const isP1 = r.horizon.startsWith("P1");
+          const borderColor = isP1 ? DS.darkRed : DS.amber;
+          const textColor   = isP1 ? DS.darkRed : DS.saddleBrown;
+          const preview = r.content.slice(0, 160) + "…";
+          return (
+            <div key={r.id} style={{ backgroundColor: DS.white, borderRadius: 10, border: `1px solid ${DS.border}`, padding: "20px 24px", borderLeft: `3px solid ${borderColor}` }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 10 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: DS.textGrey, flexShrink: 0, paddingTop: 2, minWidth: 28 }}>{r.id}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: DS.deepForest, margin: 0, lineHeight: 1.35 }}>{r.title}</p>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: textColor, backgroundColor: isP1 ? DS.redBg : DS.amberBg, borderRadius: 4, padding: "1px 7px", flexShrink: 0 }}>{r.horizon}</span>
+                  </div>
+                  <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.7, margin: 0 }}>
+                    {isOpen ? r.content : r.preview}
+                  </p>
+                </div>
+              </div>
+              {isOpen && (
+                <div style={{ marginLeft: 40, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${DS.border}` }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: textColor, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 4px" }}>Business Impact</p>
+                  <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.65, margin: 0 }}>{r.impact}</p>
+                </div>
+              )}
+              <button onClick={() => toggleRec(r.id)} style={{ marginLeft: 40, marginTop: 10, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: DS.forestMed }}>{isOpen ? "Show less" : "Read more"}</span>
+                <span style={{ color: DS.forestMed }}>{isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Target IT Stack */}
+      <p style={{ ...labelStyle, marginBottom: 12 }}>Target IT Stack</p>
+      <div style={{ ...card, marginBottom: 16 }}>
+        <p style={{ fontSize: 13, color: DS.textGrey, lineHeight: 1.7, margin: "0 0 20px" }}>
+          The target stack retains all green-status tools, decommissions legacy tools generating known operational issues, and adds two missing capabilities — document management and IT ticketing. The data stack is rebuilt as a standalone layer independent of the application ESB.
+        </p>
+        <div style={{ ...g.col2(isMobile), gap: 12, marginBottom: 16 }}>
+          {/* Retained tools by category */}
+          {Object.entries(
+            GREEN_TOOLS.reduce((acc, t) => {
+              (acc[t.category] = acc[t.category] || []).push(t.name);
+              return acc;
+            }, {} as Record<string, string[]>)
+          ).map(([cat, names]) => (
+            <div key={cat} style={{ backgroundColor: DS.lightGrey, borderRadius: 8, padding: 14 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>{cat}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {names.map(n => (
+                  <div key={n} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#22C55E", flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: DS.deepForest, fontWeight: 500 }}>{n}</span>
+                  </div>
+                ))}
+                {cat === "Finance & ERP" && NEW_TOOLS.filter(t => t.category === "Document Management").map(t => (
+                  <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: DS.amber, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: DS.deepForest, fontWeight: 500 }}>{t.name} <span style={{ color: DS.saddleBrown, fontSize: 11 }}>({t.note})</span></span>
+                  </div>
+                ))}
+                {cat === "Infrastructure & Security" && NEW_TOOLS.filter(t => t.category === "IT Operations").map(t => (
+                  <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: DS.amber, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: DS.deepForest, fontWeight: 500 }}>{t.name} <span style={{ color: DS.saddleBrown, fontSize: 11 }}>({t.note})</span></span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Data stack */}
+        <div style={{ backgroundColor: DS.deepForest, borderRadius: 8, padding: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Data Stack (rebuilt)</p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {DATA_TOOLS.map(t => (
+              <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 7, backgroundColor: "rgba(255,255,255,0.07)", borderRadius: 6, padding: "6px 12px" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: DS.amber, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: DS.white, fontWeight: 500 }}>{t.name}</span>
+                <span style={{ fontSize: 11, color: DS.sage }}>({t.note})</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Budget table */}
+      <p style={{ ...labelStyle, marginBottom: 12 }}>3-Year Budget Projection</p>
+      <div style={{ backgroundColor: DS.white, borderRadius: 12, border: `1px solid ${DS.border}`, overflow: "hidden", marginBottom: 8 }}>
+        {/* Header */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr repeat(2, 80px)" : "1fr repeat(4, 110px)", backgroundColor: DS.deepForest }}>
+          <div style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em" }}>Line item</div>
+          {(isMobile ? ["Y1", "Y2"] : ["Year 1", "Year 2", "Year 3", "3Y Total"]).map(h => (
+            <div key={h} style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: DS.sage, textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>{h}</div>
+          ))}
+        </div>
+        {/* Section labels + rows */}
+        {[
+          { section: "EXISTING COSTS", types: ["neutral"] as const },
+          { section: "SAVINGS", types: ["positive"] as const },
+          { section: "NEW INVESTMENTS", types: ["investment"] as const },
+        ].map(({ section, types }) => {
+          const sectionRows = BUDGET.rows.filter(r => types.includes(r.type as any));
+          return (
+            <div key={section}>
+              <div style={{ padding: "6px 16px", backgroundColor: DS.lightGrey, borderTop: `1px solid ${DS.border}` }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: DS.textGrey, textTransform: "uppercase", letterSpacing: "0.1em" }}>{section}</span>
+              </div>
+              {sectionRows.map((row, i) => (
+                <div key={row.label} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr repeat(2, 80px)" : "1fr repeat(4, 110px)", borderTop: `1px solid ${DS.border}` }}>
+                  <div style={{ padding: "10px 16px", fontSize: 13, color: DS.textGrey }}>{row.label}</div>
+                  {(isMobile ? [0, 1] : [0, 1, 2]).map(yi => (
+                    <div key={yi} style={{ padding: "10px 16px", fontSize: 13, fontWeight: 500, color: fmtColor(row.values[yi]), textAlign: "right" }}>
+                      {row.values[yi] === 0 ? "—" : fmt(row.values[yi])}
+                    </div>
+                  ))}
+                  {!isMobile && (
+                    <div style={{ padding: "10px 16px", fontSize: 13, fontWeight: 700, color: fmtColor(rowTotals[BUDGET.rows.indexOf(row)]), textAlign: "right", borderLeft: `1px solid ${DS.border}` }}>
+                      {rowTotals[BUDGET.rows.indexOf(row)] === 0 ? "—" : fmt(rowTotals[BUDGET.rows.indexOf(row)])}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+        {/* Total row */}
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr repeat(2, 80px)" : "1fr repeat(4, 110px)", borderTop: `2px solid ${DS.deepForest}`, backgroundColor: DS.deepForest }}>
+          <div style={{ padding: "12px 16px", fontSize: 13, fontWeight: 800, color: DS.white }}>Total IT spend</div>
+          {(isMobile ? [0, 1] : [0, 1, 2]).map(yi => (
+            <div key={yi} style={{ padding: "12px 16px", fontSize: 13, fontWeight: 800, color: DS.white, textAlign: "right" }}>{fmt(yearTotals[yi])}</div>
+          ))}
+          {!isMobile && (
+            <div style={{ padding: "12px 16px", fontSize: 14, fontWeight: 800, color: DS.sage, textAlign: "right", borderLeft: `1px solid rgba(255,255,255,0.15)` }}>{fmt(grandTotal)}</div>
+          )}
+        </div>
+      </div>
+      <p style={{ fontSize: 12, color: DS.textGrey, margin: "0 0 4px" }}>All figures in K€. Decommissioning savings shown as annual recurring benefit from Y1.</p>
+      <p style={{ fontSize: 12, color: DS.textGrey, margin: 0 }}>Integration & change management includes external consulting, developer resources, and training. AI licenses estimated based on Microsoft 365 Copilot + vendor pilots.</p>
+    </div>
+  );
+};
+
+// ─── SECTION 08 — TRANSFORMATION PLAN ────────────────────────────────────────
 type Phase = "P1" | "P2" | "P3";
 interface GanttItem { id: string; ws: 1|2|3|4; label: string; start: number; end: number; phase: Phase; detail: string; tools: string; }
 
@@ -1523,7 +1777,7 @@ const TransformationSection = ({ isMobile = false }: { isMobile?: boolean }) => 
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <span style={labelStyle}>Section 07</span>
+        <span style={labelStyle}>Section 08</span>
         <h1 style={h1Style}>Transformation Plan</h1>
       </div>
 
@@ -2046,7 +2300,8 @@ const SECTION_CARDS = [
   { id: "data",           icon: Database,   label: "04 · Data",                blurb: "ESB architecture, 4 master data gaps & medallion target"    },
   { id: "processus",      icon: Settings,   label: "05 · Processes",           blurb: "Commercial, Finance, EHPAD Ops & HR — drill-down by domain" },
   { id: "ia",             icon: Zap,        label: "06 · AI",                  blurb: "Governance, 5 priority use cases & long-term roadmap"       },
-  { id: "transformation", icon: Target,     label: "07 · Transformation Plan", blurb: "26 actions across 4 workstreams — Gantt M1→M18"             },
+  { id: "recommandations",icon: FileText,   label: "07 · Recommendations",     blurb: "Target IT stack, data architecture, and 3-year budget"      },
+  { id: "transformation", icon: Target,     label: "08 · Transformation Plan", blurb: "26 actions across 4 workstreams — Gantt M1→M18"             },
 ];
 
 const LandingSection = ({ onEnter }: { onEnter: (id: string) => void }) => {
@@ -2230,6 +2485,7 @@ export default function AuditReport() {
       case "data":           return <DataSection isMobile={isMobile} />;
       case "ia":             return <AISection isMobile={isMobile} />;
       case "processus":      return <ProcessSection isMobile={isMobile} />;
+      case "recommandations": return <RecommandationsSection isMobile={isMobile} />;
       case "transformation": return <TransformationSection isMobile={isMobile} />;
       default:               return <Placeholder label={NAV.find(n => n.id === active)?.label ?? ""} />;
     }
